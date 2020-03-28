@@ -1,0 +1,125 @@
+" The MIT License (MIT)
+"
+" Copyright (c) 2020 Urbain Vaes
+"
+" Permission is hereby granted, free of charge, to any person obtaining a copy
+" of this software and associated documentation files (the "Software"), to deal
+" in the Software without restriction, including without limitation the rights
+" to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+" copies of the Software, and to permit persons to whom the Software is
+" furnished to do so, subject to the following conditions:
+"
+" The above copyright notice and this permission notice shall be included in
+" all copies or substantial portions of the Software.
+"
+" THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+" IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+" FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+" AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+" LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+" OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+" THE SOFTWARE.
+
+let s:default_window = "vnew"
+let s:default_delay = "500m"
+let s:default_repls = {
+            \ "python": "ipython",
+            \ "scheme": "guile",
+            \ }
+
+" Memory to execute previous code selection
+let s:term_buffer_nr = -1
+let s:is_visual = 0
+let s:charwise = 1
+let [s:line_start, s:column_start] = [0, 0]
+let [s:line_end, s:column_end] = [0, 0]
+
+function! Ripple_status()
+    if s:term_buffer_nr == -1
+        echom "No term buffer opened"
+    else
+        echom "Term buffer:" s:term_buffer_nr
+    endif
+endfunction
+
+function! Open_repl()
+    if s:term_buffer_nr != -1 && buffer_exists(s:term_buffer_nr)
+        return
+    endif
+    let [ft, winnr] = [&ft, winnr()]
+
+    let repls = s:default_repls
+    if has_key(g:, 'ripple_repls')
+        extend(repls, g:ripple_repls)
+    endif
+    if has_key(repls, ft)
+        let repl_command = repls[ft]
+    else
+        echom "No repl for filetype" ft
+        return
+    endif
+
+    let new_window = get(g:, 'ripple_window', s:default_window)
+    silent execute new_window
+    silent execute "term" repl_command
+    let s:term_buffer_nr = bufnr()
+    autocmd BufDelete let s:term_buffer_nr = -1
+
+    execute winnr."wincmd w"
+    execute "sleep" s:default_delay
+endfunction
+
+function! Send_to_term(code)
+    call Open_repl()
+    execute "noautocmd buffer" s:term_buffer_nr
+    norm G$
+    set paste
+    let open_bracketed_paste = "\<esc>[200~"
+    let close_bracketed_paste = "\<esc>[201~"
+    let newline = "\<cr>"
+    put =open_bracketed_paste
+    put =a:code
+    put =close_bracketed_paste
+    put =newline
+    set nopaste
+    buffer #
+endfunction
+
+" Argument is either
+" - "p": to repeat previous code selection
+" - "v" or "V": when called from v or V mode
+" - "line" or "char", when called from g@
+function! Send_motion_or_selection(...)
+    if a:1 != "p"
+        let s:is_visual = (a:1 == "v" || a:1 == "V")
+        let s:char_wise = (a:1 == "char" || a:1 == "v")
+        let m1 = s:is_visual ? "'<" : "'["
+        let m2 = s:is_visual ? "'>" : "']"
+        let [s:line_start, s:column_start] = getpos(l:m1)[1:2]
+        let [s:line_end, s:column_end] = getpos(l:m2)[1:2]
+    endif
+
+    let lines = getline(s:line_start, s:line_end)
+    if s:char_wise
+        let lines[0] = lines[0][s:column_start - 1:]
+        let offset = (&selection == 'inclusive' ? 1 : 2)
+        let lines[-1] = lines[-1][:s:column_end - offset]
+    endif
+    let code = join(lines, "\n")
+
+    call Send_to_term(code)
+    " call setpos('.', g:save_cursor)
+endfunction
+
+function! Send_motion()
+    let save_cursor = getcurpos()
+    set opfunc=Send_motion_or_selection
+    call feedkeys("g@", 'ix')
+    call setpos('.', save_cursor)
+endfunction
+
+nnoremap <silent> y<cr> :call Open_repl()<cr>
+nnoremap <silent> yr :call Send_motion()<cr>
+nnoremap <silent> yp :call Send_motion_or_selection("p")<cr>
+xnoremap <silent> R :<c-u>call Send_motion_or_selection(visualmode())<cr>
+nmap <silent> yrr 0yr$
