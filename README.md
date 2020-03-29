@@ -12,17 +12,20 @@ Plug 'urbainvaes/vim-ripple'
 
 # Configuration of the REPLs
 
-New REPLs can defined in a dictionary.
-These definition take precedence over the default REPLs defined in the plugin.
-In the dictionary, the keys are the `filetype`s,
+New REPLs can be defined in the dictionary `g:ripple_repls`.
+These definitions take precedence over the default REPLs defined in the plugin,
+which are listed below.
+In the dictionary, the keys are `filetype`s,
 and the values are either of the following:
 
 - A string containing the command to start the REPL (e.g. `ipython`, `guile`).
 
 - A list with three string entries:
-the first must cointain the command to start the REPL (e.g. `ipython`, `guile`);
-the second and third must contain strings to prepend and append to code sent to the terminal,
-respectively. This is sometimes necessary to enable bracketed paste.
+the first must cointain the command to start the REPL;
+the second and third must contain strings to prepend and append to code sent to the REPL,
+respectively.
+This is sometimes necessary to enable bracketed paste,
+i.e. to enable sending several lines of code to the REPL at once.
 
 The current default is the following:
 ```vim
