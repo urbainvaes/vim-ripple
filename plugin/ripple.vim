@@ -105,7 +105,15 @@ function! Send_motion_or_selection(...)
         let offset = (&selection == 'inclusive' ? 1 : 2)
         let lines[-1] = lines[-1][:s:column_end - offset]
     endif
-    let code = join(lines, "\n")
+
+    " Sometimes, for example with motion `}`, the line where the cursor
+    " lands is not included, which is often undesirable for this plugin.
+    " For example, running `yr}` on a Python function with an empty line
+    " after it will paste the code of the function but not execute it.
+    let end_paragraph = a:1 == "line"
+                \ && getline(s:line_end) != ""
+                \ && getline(s:line_end + 1) == ""
+    let code = join(lines, "\<cr>").(end_paragraph ? "\<cr>" : "")
 
     call Send_to_term(code)
     " call setpos('.', g:save_cursor)
