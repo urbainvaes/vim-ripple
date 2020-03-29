@@ -23,14 +23,16 @@
 let s:default_window = "vnew"
 let s:default_delay = "500m"
 let s:default_repls = {
-            \ "python": "ipython",
+            \ "python": ["ipython", "\<esc>[200~", "\<esc>[201~"],
             \ "scheme": "guile",
+            \ "sh": "bash"
             \ }
 
 " Memory to execute previous code selection
 let s:term_buffer_nr = -1
 let s:is_visual = 0
 let s:charwise = 1
+let s:repl_params = []
 let [s:line_start, s:column_start] = [0, 0]
 let [s:line_end, s:column_end] = [0, 0]
 
@@ -53,15 +55,19 @@ function! Open_repl()
         extend(repls, g:ripple_repls)
     endif
     if has_key(repls, ft)
-        let repl_command = repls[ft]
+        let s:repl_params = repls[ft]
     else
         echom "No repl for filetype" ft
         return
     endif
 
+    if type(s:repl_params) == 1  " If string
+        let s:repl_params = [s:repl_params, "", ""]
+    endif
+
     let new_window = get(g:, 'ripple_window', s:default_window)
     silent execute new_window
-    silent execute "term" repl_command
+    silent execute "term" s:repl_params[0]
     let s:term_buffer_nr = bufnr()
     autocmd BufDelete let s:term_buffer_nr = -1
 
@@ -74,8 +80,8 @@ function! Send_to_term(code)
     execute "noautocmd buffer" s:term_buffer_nr
     norm G$
     set paste
-    let open_bracketed_paste = "\<esc>[200~"
-    let close_bracketed_paste = "\<esc>[201~"
+    let open_bracketed_paste = s:repl_params[1]
+    let close_bracketed_paste = s:repl_params[2]
     let newline = "\<cr>"
     put =open_bracketed_paste
     put =a:code
