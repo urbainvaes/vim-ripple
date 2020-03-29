@@ -119,15 +119,16 @@ function! Send_motion_or_selection(...)
     " call setpos('.', g:save_cursor)
 endfunction
 
-function! Send_motion()
-    let save_cursor = getcurpos()
-    set opfunc=Send_motion_or_selection
-    call feedkeys("g@", 'ix')
-    call setpos('.', save_cursor)
-endfunction
+" function! Send_motion()
+"     let save_cursor = getcurpos()
+"     set opfunc=Send_motion_or_selection
+"     call feedkeys("g@", 'nitx')
+"     call setpos('.', save_cursor)
+" endfunction
+" nnoremap <silent> yr :call Send_motion()<cr>
 
 nnoremap <silent> y<cr> :call Open_repl()<cr>
-nnoremap <silent> yr :call Send_motion()<cr>
+nnoremap <silent> yr :set opfunc=Send_motion_or_selection<cr>g@
 nnoremap <silent> yp :call Send_motion_or_selection("p")<cr>
 xnoremap <silent> R :<c-u>call Send_motion_or_selection(visualmode())<cr>
 nmap <silent> yrr 0yr$
