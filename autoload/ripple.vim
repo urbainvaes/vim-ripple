@@ -29,14 +29,6 @@ let s:default_repls = {
             \ "sh": "bash"
             \ }
 
-" Memory to execute previous code selection
-let s:term_buffer_nr = -1
-let s:is_visual = 0
-let s:charwise = 1
-let s:repl_params = []
-let [s:line_start, s:column_start] = [0, 0]
-let [s:line_end, s:column_end] = [0, 0]
-
 function! ripple#status()
     if s:term_buffer_nr == -1
         echom "No term buffer opened"
@@ -94,6 +86,16 @@ function! s:send_to_term(code, newline)
     buffer #
 endfunction
 
+" Memory to execute previous code selection
+let s:term_buffer_nr = -1
+let s:is_visual = 0
+let s:charwise = 1
+let s:repl_params = []
+let [s:line_start, s:column_start] = [0, 0]
+let [s:line_end, s:column_end] = [0, 0]
+let s:end_paragraph = 0
+let s:end_file = 0
+
 " Argument is either
 " - "p": to repeat previous code selection
 " - "v" or "V": when called from v or V mode
@@ -106,6 +108,14 @@ function! ripple#send_motion_or_selection(...)
         let m2 = s:is_visual ? "'>" : "']"
         let [s:line_start, s:column_start] = getpos(l:m1)[1:2]
         let [s:line_end, s:column_end] = getpos(l:m2)[1:2]
+
+        let s:end_paragraph = a:1 == "line"
+                    \ && getline(s:line_end) != ""
+                    \ && getline(s:line_end + 1) == ""
+        " To handle `yr}` at the endo of file
+        let s:end_file = a:1 == "char"
+                    \ && s:line_end == line('$')
+                    \ && s:column_end == strlen(getline(s:line_end))
     endif
 
     let lines = getline(s:line_start, s:line_end)
@@ -119,17 +129,10 @@ function! ripple#send_motion_or_selection(...)
     " lands is not included, which is often undesirable for this plugin.
     " For example, running `yr}` on a Python function with an empty line
     " after it will paste the code of the function but not execute it.
-    let end_paragraph = a:1 == "line"
-                \ && getline(s:line_end) != ""
-                \ && getline(s:line_end + 1) == ""
-    " To handle `yr}` at the endo of file
-    let end_file = a:1 == "char"
-                \ && s:line_end == line('$')
-                \ && s:column_end == strlen(getline(s:line_end))
-    let add_cr = end_paragraph || end_file
+    let add_cr = s:end_paragraph || s:end_file
     let code = join(lines, "\<cr>").(add_cr ? "\<cr>" : "")
 
-    let newline = end_file || !s:char_wise
+    let newline = s:end_file || !s:char_wise
     call s:send_to_term(code, newline)
 
     if a:1 == "line" || a:1 == "char"
