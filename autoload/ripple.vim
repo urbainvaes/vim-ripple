@@ -22,9 +22,9 @@
 
 let s:default_highlight = "DiffAdd"
 let s:default_window = "vnew"
-let s:default_delay = "500m"
+let s:default_delay = "1m"
 let s:default_repls = {
-            \ "python": ["ipython", "\<esc>[200~", "\<esc>[201~"],
+            \ "python": ["ipython", "\<c-u>\<esc>[200~", "\<esc>[201~"],
             \ "scheme": "guile",
             \ "sh": "bash"
             \ }
