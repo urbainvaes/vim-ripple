@@ -14,7 +14,7 @@ motions sent to the REPL are highlighted.
 the REPL opens automatically once a code chunk is sent.
 
 ![](https://raw.github.com/urbainvaes/vim-ripple/demo/demo.gif)
-(This video was generated with `screenkey -g $(slop -n -f '%g')` and `simplescreenrecorder`.)
+(Click to enlarge.)
 
 ## Installation
 

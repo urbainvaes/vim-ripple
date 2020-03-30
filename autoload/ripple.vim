@@ -115,7 +115,6 @@ function! ripple#send_motion_or_selection(...)
         let m2 = s:is_visual ? "'>" : "']"
         let [s:line_start, s:column_start] = getpos(l:m1)[1:2]
         let [s:line_end, s:column_end] = getpos(l:m2)[1:2]
-        echom [s:line_end, s:column_end]
 
         let s:end_paragraph = a:1 == "line"
                     \ && getline(s:line_end) != ""
