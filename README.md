@@ -13,6 +13,9 @@ motions sent to the REPL are highlighted.
 - If not explicitly opened by `<Plug>(ripple_open_repl)`,
 the REPL opens automatically once a code chunk is sent.
 
+![](https://raw.github.com/urbainvaes/vim-ripple/demo/demo.gif)
+(This video was generated with `screenkey -g $(slop -n -f '%g')` and `simplescreenrecorder`.)
+
 ## Installation
 
 Using [vim-plug](https://github.com/junegunn/vim-plug):
