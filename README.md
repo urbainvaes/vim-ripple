@@ -1,16 +1,16 @@
 # Ripple
 
 This thin `nvim` plugin makes it easy to send code to a REPL (read-evaluate-print loop) running within `nvim`.
-Some advantages of this plugin over some the alternatives (such as [iron.nvim](https://github.com/Vigemus/iron.nvim)) are the following:
+Some advantages of this plugin over some of the alternatives (such as [iron.nvim](https://github.com/Vigemus/iron.nvim)) are the following:
 
-- This plugin is written in `viml`, so it does not require to `updateRemotePlugins`.
+- This plugin is written and can be configured in `viml`.
 
 - The cursor does not move when a code chunk is sent to the REPL.
 
-- If [vim-highlightedyank](https://github.com/machakann/vim-highlightedyank) is installed, 
+- If [vim-highlightedyank](https://github.com/machakann/vim-highlightedyank) is installed,
 motions sent to the REPL are highlighted.
 
-- If not explicitly opened by `<Plug>(ripple_open_repl)`, 
+- If not explicitly opened by `<Plug>(ripple_open_repl)`,
 the REPL opens automatically once a code chunk is sent.
 
 ## Installation
@@ -34,17 +34,18 @@ and the values are either of the following:
 
 - A string containing the command to start the REPL (e.g. `ipython`, `guile`).
 
-- A list with three string entries:
-the first must cointain the command to start the REPL;
+- A list of three string entries:
+the first must contain the command to start the REPL;
 the second and third must contain strings to prepend and append to code sent to the REPL,
 respectively.
-This is sometimes necessary to enable bracketed paste,
-i.e. to enable sending several lines of code to the REPL at once.
+This is sometimes necessary to enable sending several lines of code to the REPL at once.
+The fourth element of the list must be either 0 or 1,
+and it controls whether an additional `\<cr>` should be appended to the code chunks followed by a blank line.
 
 The current default is the following:
 ```vim
 let s:default_repls = {
-            \ "python": ["ipython", "\<esc>[200~", "\<esc>[201~"],
+            \ "python": ["ipython", "\<c-u>\<esc>[200~", "\<esc>[201~"], 1]
             \ "scheme": "guile",
             \ "sh": "bash"
             \ }

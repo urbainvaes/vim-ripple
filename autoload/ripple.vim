@@ -24,7 +24,7 @@ let s:default_highlight = "DiffAdd"
 let s:default_window = "vnew"
 let s:default_delay = "1m"
 let s:default_repls = {
-            \ "python": ["ipython", "\<c-u>\<esc>[200~", "\<esc>[201~"],
+            \ "python": ["ipython", "\<c-u>\<esc>[200~", "\<esc>[201~", 1],
             \ "scheme": "guile",
             \ "sh": "bash"
             \ }
@@ -55,7 +55,7 @@ function! ripple#open_repl()
     endif
 
     if type(s:repl_params) == 1  " If string
-        let s:repl_params = [s:repl_params, "", ""]
+        let s:repl_params = [s:repl_params, "", "", 0]
     endif
 
     let new_window = get(g:, 'ripple_window', s:default_window)
@@ -69,18 +69,21 @@ function! ripple#open_repl()
     return 0
 endfunction
 
-function! s:send_to_term(code, newline)
+function! s:send_to_term(code, newline, add_cr)
     let return_code = ripple#open_repl()
     if return_code == -1
         return
     endif
+
+    " Add <cr> (useful e.g. so that python functions get run)
+    let code = (a:add_cr && s:repl_params[3]) ? a:code."\<cr>" : a:code
     execute "noautocmd buffer" s:term_buffer_nr
     norm G$
     set paste
     let open_bracketed_paste = s:repl_params[1]
     let close_bracketed_paste = s:repl_params[2]
     put =open_bracketed_paste
-    put =a:code
+    put =code
     put =close_bracketed_paste
     if a:newline
         let newline = "\<cr>"
@@ -133,11 +136,11 @@ function! ripple#send_motion_or_selection(...)
     " lands is not included, which is often undesirable for this plugin.
     " For example, running `yr}` on a Python function with an empty line
     " after it will paste the code of the function but not execute it.
-    let add_cr = s:end_paragraph || s:end_file
-    let code = join(lines, "\<cr>").(add_cr ? "\<cr>" : "")
 
+    let add_cr = s:end_paragraph || s:end_file
+    let code = join(lines, "\<cr>")
     let newline = s:end_file || !s:char_wise
-    call s:send_to_term(code, newline)
+    call s:send_to_term(code, newline, add_cr)
 
     if a:1 == "line" || a:1 == "char"
         call setpos('.', s:save_cursor)
@@ -151,7 +154,6 @@ function! ripple#send_motion_or_selection(...)
         let delay = 1000
         call highlightedyank#highlight#add(higroup, start, end, type, delay)
     endif
-
 endfunction
 
 function! ripple#send_motion()
