@@ -8,6 +8,9 @@ Using [vim-plug](https://github.com/junegunn/vim-plug):
 
 ```vim
 Plug 'urbainvaes/vim-ripple'
+
+" Optional dependency
+Plug 'machakann/vim-highlightedyank'
 ```
 
 ## Configuration of the REPLs
