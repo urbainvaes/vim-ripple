@@ -1,6 +1,17 @@
 # Ripple
 
 This thin `nvim` plugin makes it easy to interact with a REPL (read-evaluate-print loop).
+Some of the advantages of this plugin over some the alternative software are the following:
+
+- This plugin is written in `viml`, so it does not require to `updateRemotePlugins`.
+
+- The cursor position does not change when a code chunk is sent to the REPL.
+
+- If [vim-highlightedyank](https://github.com/machakann/vim-highlightedyank) is installed, 
+motions sent to the REPL are highlighted.
+
+- If not explicitly opened by `<Plug>(ripple_open_repl)`, 
+the REPL opens automatically once a code chunk is sent.
 
 ## Installation
 
@@ -65,7 +76,7 @@ A mnemonic for `yr` is *you run*.
 | `g:ripple_enable_mappings` | `1`       | Whether to enable default mappings  |
 | `g:ripple_highlight`       | `DiffAdd` | Highlight group                     |
 
-To disable highlighting the code chunk sent to the REPL, simply `let g:ripple_highlight = ""`.
+To disable highlighting of code chunks sent to the REPL, simply `let g:ripple_highlight = ""`.
 Highlighting works only when the plugin [vim-highlightedyank](https://github.com/machakann/vim-highlightedyank) is installed.
 
 ## License
