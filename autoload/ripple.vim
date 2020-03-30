@@ -76,18 +76,20 @@ function! ripple#open_repl()
     execute "sleep" s:default_delay
 endfunction
 
-function! s:send_to_term(code)
+function! s:send_to_term(code, newline)
     call ripple#open_repl()
     execute "noautocmd buffer" s:term_buffer_nr
     norm G$
     set paste
     let open_bracketed_paste = s:repl_params[1]
     let close_bracketed_paste = s:repl_params[2]
-    let newline = "\<cr>"
     put =open_bracketed_paste
     put =a:code
     put =close_bracketed_paste
-    put =newline
+    if a:newline
+        let newline = "\<cr>"
+        put =newline
+    endif
     set nopaste
     buffer #
 endfunction
@@ -98,8 +100,8 @@ endfunction
 " - "line" or "char", when called from g@
 function! ripple#send_motion_or_selection(...)
     if a:1 != "p"
-        let s:is_visual = (a:1 == "v" || a:1 == "V")
-        let s:char_wise = (a:1 == "char" || a:1 == "v")
+        let s:is_visual = (a:1 ==# "v" || a:1 ==# "V")
+        let s:char_wise = (a:1 ==# "char" || a:1 ==# "v")
         let m1 = s:is_visual ? "'<" : "'["
         let m2 = s:is_visual ? "'>" : "']"
         let [s:line_start, s:column_start] = getpos(l:m1)[1:2]
@@ -117,12 +119,18 @@ function! ripple#send_motion_or_selection(...)
     " lands is not included, which is often undesirable for this plugin.
     " For example, running `yr}` on a Python function with an empty line
     " after it will paste the code of the function but not execute it.
-    let end_paragraph = !s:char_wise
+    let end_paragraph = a:1 == "line"
                 \ && getline(s:line_end) != ""
                 \ && getline(s:line_end + 1) == ""
-    let code = join(lines, "\<cr>").(end_paragraph ? "\<cr>" : "")
+    " To handle `yr}` at the endo of file
+    let end_file = a:1 == "char"
+                \ && s:line_end == line('$')
+                \ && s:column_end == strlen(getline(s:line_end))
+    let add_cr = end_paragraph || end_file
+    let code = join(lines, "\<cr>").(add_cr ? "\<cr>" : "")
 
-    call s:send_to_term(code)
+    let newline = end_file || !s:char_wise
+    call s:send_to_term(code, newline)
 
     if a:1 == "line" || a:1 == "char"
         call setpos('.', s:save_cursor)
