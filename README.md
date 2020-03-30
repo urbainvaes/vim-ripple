@@ -1,11 +1,11 @@
 # Ripple
 
-This thin `nvim` plugin makes it easy to interact with a REPL (read-evaluate-print loop).
-Some of the advantages of this plugin over some the alternative software are the following:
+This thin `nvim` plugin makes it easy to send code to a REPL (read-evaluate-print loop) running within `nvim`.
+Some advantages of this plugin over some the alternatives (such as [iron.nvim](https://github.com/Vigemus/iron.nvim)) are the following:
 
 - This plugin is written in `viml`, so it does not require to `updateRemotePlugins`.
 
-- The cursor position does not change when a code chunk is sent to the REPL.
+- The cursor does not move when a code chunk is sent to the REPL.
 
 - If [vim-highlightedyank](https://github.com/machakann/vim-highlightedyank) is installed, 
 motions sent to the REPL are highlighted.

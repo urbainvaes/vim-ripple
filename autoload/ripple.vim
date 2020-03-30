@@ -51,7 +51,7 @@ function! ripple#open_repl()
         let s:repl_params = repls[ft]
     else
         echom "No repl for filetype" ft
-        return
+        return -1
     endif
 
     if type(s:repl_params) == 1  " If string
@@ -66,10 +66,14 @@ function! ripple#open_repl()
 
     execute winnr."wincmd w"
     execute "sleep" s:default_delay
+    return 0
 endfunction
 
 function! s:send_to_term(code, newline)
-    call ripple#open_repl()
+    let return_code = ripple#open_repl()
+    if return_code == -1
+        return
+    endif
     execute "noautocmd buffer" s:term_buffer_nr
     norm G$
     set paste
