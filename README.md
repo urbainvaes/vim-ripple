@@ -15,7 +15,7 @@ Plug 'urbainvaes/vim-ripple'
 New REPLs can be defined in the dictionary `g:ripple_repls`.
 These definitions take precedence over the default REPLs defined in the plugin,
 which are listed below.
-In the dictionary, the keys are `filetype`s,
+In the dictionary, the keys are `filetype`s
 and the values are either of the following:
 
 - A string containing the command to start the REPL (e.g. `ipython`, `guile`).
@@ -56,10 +56,14 @@ A mnemonic for `yr` is *you run*.
 
 ## Additional customization
 
-| Config            | Default | Description |
-| ------            | ------- | ----------- |
-| `g:ripple_window` | `vnew`  | The command to open the REPL window |
-| `g:ripple_enable_mappings` | `1`  | Whether to enable default mappings |
+| Config                     | Default   | Description                         |
+| ------                     | -------   | -----------                         |
+| `g:ripple_window`          | `vnew`    | The command to open the REPL window |
+| `g:ripple_enable_mappings` | `1`       | Whether to enable default mappings  |
+| `g:ripple_highlight`       | `DiffAdd` | Highlight group                     |
+
+To disable highlighting the code chunk sent to the REPL, simply `let g:ripple_highlight = ""`.
+Highlighting works only when the plugin [vim-highlightedyank](https://github.com/machakann/vim-highlightedyank) is installed.
 
 ## License
 

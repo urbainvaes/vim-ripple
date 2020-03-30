@@ -23,10 +23,10 @@
 let s:default_enable_mappings = 1
 
 nnoremap <silent> <Plug>(ripple_open_repl) :call ripple#open_repl()<cr>
-nnoremap <silent> <Plug>(ripple_send_motion) :set opfunc=ripple#send_motion_or_selection<cr>g@
-nnoremap <silent> <Plug>(ripple_send_previous) :call #ripple#send_motion_or_selection("p")<cr>
-xnoremap <silent> <Plug>(ripple_send_selection) :<c-u>call #ripple#send_motion_or_selection(visualmode())<cr>
-nmap <silent> <Plug>(ripple_send_line) <Plug>(ripple_send_motion) 0yr$
+nnoremap <silent> <expr> <Plug>(ripple_send_motion) ripple#send_motion()
+nnoremap <silent> <Plug>(ripple_send_previous) :call ripple#send_motion_or_selection("p")<cr>
+xnoremap <silent> <Plug>(ripple_send_selection) :<c-u>call ripple#send_motion_or_selection(visualmode())<cr>
+nmap <silent> <Plug>(ripple_send_line) 0yr$
 
 if get(g:, 'ripple_enable_mappings', s:default_enable_mappings)
     nmap y<cr> <Plug>(ripple_open_repl)

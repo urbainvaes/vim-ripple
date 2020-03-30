@@ -20,6 +20,7 @@
 " OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 " THE SOFTWARE.
 
+let s:default_highlight = "DiffAdd"
 let s:default_window = "vnew"
 let s:default_delay = "500m"
 let s:default_repls = {
@@ -116,10 +117,30 @@ function! ripple#send_motion_or_selection(...)
     " lands is not included, which is often undesirable for this plugin.
     " For example, running `yr}` on a Python function with an empty line
     " after it will paste the code of the function but not execute it.
-    let end_paragraph = a:1 == "line"
+    let end_paragraph = !s:char_wise
                 \ && getline(s:line_end) != ""
                 \ && getline(s:line_end + 1) == ""
     let code = join(lines, "\<cr>").(end_paragraph ? "\<cr>" : "")
 
     call s:send_to_term(code)
+
+    if a:1 == "line" || a:1 == "char"
+        call setpos('.', s:save_cursor)
+    endif
+
+    let higroup = get(g:, 'ripple_highlight', s:default_highlight)
+    if &runtimepath =~ 'highlightedyank' && higroup != ""
+        let start = [0, s:line_start, s:column_start, 0]
+        let end = [0, s:line_end, s:column_end, 0]
+        let type = s:char_wise ? 'v' : 'V'
+        let delay = 1000
+        call highlightedyank#highlight#add(higroup, start, end, type, delay)
+    endif
+
+endfunction
+
+function! ripple#send_motion()
+    let s:save_cursor = getcurpos()
+    set operatorfunc=ripple#send_motion_or_selection
+    return 'g@'
 endfunction
