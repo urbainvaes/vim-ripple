@@ -22,7 +22,7 @@
 
 let s:default_highlight = "DiffAdd"
 let s:default_window = "vnew"
-let s:default_delay = "1m"
+let s:default_delay = "1000m"
 let s:default_repls = {
             \ "python": ["ipython", "\<c-u>\<esc>[200~", "\<esc>[201~", 1],
             \ "scheme": "guile",
@@ -115,6 +115,7 @@ function! ripple#send_motion_or_selection(...)
         let m2 = s:is_visual ? "'>" : "']"
         let [s:line_start, s:column_start] = getpos(l:m1)[1:2]
         let [s:line_end, s:column_end] = getpos(l:m2)[1:2]
+        echom [s:line_end, s:column_end]
 
         let s:end_paragraph = a:1 == "line"
                     \ && getline(s:line_end) != ""
@@ -127,9 +128,9 @@ function! ripple#send_motion_or_selection(...)
 
     let lines = getline(s:line_start, s:line_end)
     if s:char_wise
-        let lines[0] = lines[0][s:column_start - 1:]
         let offset = (&selection == 'inclusive' ? 1 : 2)
         let lines[-1] = lines[-1][:s:column_end - offset]
+        let lines[0] = lines[0][s:column_start - 1:]
     endif
 
     " Sometimes, for example with motion `}`, the line where the cursor
