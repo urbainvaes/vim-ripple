@@ -62,7 +62,6 @@ function! ripple#open_repl()
     silent execute new_window
     silent execute "term" s:repl_params[0]
     let s:term_buffer_nr = bufnr()
-    autocmd BufDelete let s:term_buffer_nr = -1
 
     execute winnr."wincmd w"
     execute "sleep" s:default_delay
@@ -145,6 +144,7 @@ function! ripple#send_motion_or_selection(...)
 
     if a:1 == "line" || a:1 == "char"
         call setpos('.', s:save_cursor)
+        call winrestview(s:save_view)
     endif
 
     let higroup = get(g:, 'ripple_highlight', s:default_highlight)
@@ -159,6 +159,7 @@ endfunction
 
 function! ripple#send_motion()
     let s:save_cursor = getcurpos()
+    let s:save_view = winsaveview()
     set operatorfunc=ripple#send_motion_or_selection
     return 'g@'
 endfunction
