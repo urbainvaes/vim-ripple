@@ -77,6 +77,7 @@ function! s:send_to_term(code, newline, add_cr)
 
     " Add <cr> (useful e.g. so that python functions get run)
     let code = (a:add_cr && s:repl_params[3]) ? a:code."\<cr>" : a:code
+    tab split
     execute "noautocmd buffer" s:term_buffer_nr
     norm G$
     set paste
@@ -90,7 +91,7 @@ function! s:send_to_term(code, newline, add_cr)
         put =newline
     endif
     set nopaste
-    buffer #
+    tab close
 endfunction
 
 " Memory to execute previous code selection
