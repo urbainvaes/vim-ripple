@@ -37,13 +37,15 @@ and the values are either of the following:
 
 - A string containing the command to start the REPL (e.g. `ipython`, `guile`).
 
-- A list of three string entries:
-the first must contain the command to start the REPL;
+- A list of three string entries and a boolean entry:
+the first string must contain the command to start the REPL;
 the second and third must contain strings to prepend and append to code sent to the REPL,
 respectively.
 This is sometimes necessary to enable sending several lines of code to the REPL at once.
 The fourth element of the list must be either 0 or 1,
-and it controls whether an additional `\<cr>` should be appended to the code chunks followed by a blank line.
+and it controls whether an additional `<cr>` should be appended to the code chunks followed by a blank line.
+(This can be useful to avoid the need to press `<cr>` manually in the terminal window.
+In `ipython`, for example, two `<cr>` are required to run an indented block.)
 
 The current default is the following:
 ```vim
@@ -80,7 +82,7 @@ A mnemonic for `yr` is *you run*.
 | `g:ripple_enable_mappings` | `1`       | Whether to enable default mappings  |
 | `g:ripple_highlight`       | `DiffAdd` | Highlight group                     |
 
-To disable highlighting of code chunks sent to the REPL, simply `let g:ripple_highlight = ""`.
+To disable th highlighting of code chunks sent to the REPL, simply `let g:ripple_highlight = ""`.
 Highlighting works only when the plugin [vim-highlightedyank](https://github.com/machakann/vim-highlightedyank) is installed.
 
 ## License
