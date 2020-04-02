@@ -46,7 +46,7 @@ function! ripple#open_repl()
 
     let repls = s:default_repls
     if has_key(g:, 'ripple_repls')
-        extend(repls, g:ripple_repls)
+        call extend(repls, g:ripple_repls)
     endif
     if has_key(repls, ft)
         let s:repl_params = repls[ft]
