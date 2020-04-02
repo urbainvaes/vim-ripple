@@ -50,7 +50,7 @@ In `ipython`, for example, two `<cr>` are required to run an indented block.)
 The current default is the following:
 ```vim
 let s:default_repls = {
-            \ "python": ["ipython", "\<c-u>\<esc>[200~", "\<esc>[201~"], 1]
+            \ "python": ["ipython", "\<c-u>\<esc>[200~", "\<esc>[201~", 1],
             \ "scheme": "guile",
             \ "sh": "bash"
             \ }
