@@ -22,6 +22,7 @@
 
 let s:default_highlight = "DiffAdd"
 let s:default_window = "vnew"
+let s:default_term_command = "vertical terminal"
 let s:default_delay = "1000m"
 let s:default_repls = {
             \ "python": ["ipython", "\<c-u>\<esc>[200~", "\<esc>[201~", 1],
@@ -58,9 +59,14 @@ function! ripple#open_repl()
         let s:repl_params = [s:repl_params, "", "", 0]
     endif
 
-    let new_window = get(g:, 'ripple_window', s:default_window)
-    silent execute new_window
-    silent execute "term" s:repl_params[0]
+    if has("nvim")
+        let new_window = get(g:, 'ripple_window', s:default_window)
+        silent execute new_window
+        silent execute "term" s:repl_params[0]
+    else
+        let term_command = get(g:, 'ripple_term_command', s:default_term_command)
+        silent execute term_command s:repl_params[0]
+    endif
     let s:term_buffer_nr = bufnr()
 
     execute winnr."wincmd w"
@@ -79,17 +85,23 @@ function! s:send_to_term(code, newline, add_cr)
     tab split
     execute "noautocmd buffer" s:term_buffer_nr
     norm G$
-    set paste
-    let open_bracketed_paste = s:repl_params[1]
-    let close_bracketed_paste = s:repl_params[2]
-    put =open_bracketed_paste
-    put =code
-    put =close_bracketed_paste
-    if a:newline
-        let newline = "\<cr>"
-        put =newline
+    if has("nvim")
+        let open_bracketed_paste = s:repl_params[1]
+        let close_bracketed_paste = s:repl_params[2]
+        put =open_bracketed_paste
+        put =code
+        put =close_bracketed_paste
+        if a:newline
+            let newline = "\<cr>"
+            put =newline
+        endif
+    else
+        let open_bracketed_paste = s:repl_params[1]
+        let close_bracketed_paste = s:repl_params[2]
+        let newline = a:newline ? "\<cr>" : ""
+        let typed_string = "\<c-\>\<c-n>a".open_bracketed_paste.code.close_bracketed_paste.newline
+        call feedkeys(typed_string, "ntx")
     endif
-    set nopaste
     tab close
 endfunction
 
