@@ -1,6 +1,6 @@
 # Ripple
 
-This thin `nvim` plugin makes it easy to send code to a REPL (read-evaluate-print loop) running within `nvim`.
+This thin plugin makes it easy to send code to a REPL (read-evaluate-print loop) running within `vim` or `nvim`.
 Some advantages of this plugin over some of the alternatives (such as [iron.nvim](https://github.com/Vigemus/iron.nvim)) are the following:
 
 - This plugin is written and can be configured in `viml`.
@@ -35,7 +35,7 @@ which are listed below.
 In the dictionary, the keys are `filetype`s
 and the values are either of the following:
 
-- A string containing the command to start the REPL (e.g. `ipython`, `guile`).
+- A string containing the command to start the REPL (e.g. `bash`, `guile`).
 
 - A list of three string entries and a boolean entry:
 the first string must contain the command to start the REPL;
@@ -43,7 +43,7 @@ the second and third must contain strings to prepend and append to code sent to 
 respectively.
 This is sometimes necessary to enable sending several lines of code to the REPL at once.
 The fourth element of the list must be either 0 or 1,
-and it controls whether an additional `<cr>` should be appended to the code chunks followed by a blank line.
+and it controls whether an additional `<cr>` should be appended to the code chunks that are followed by a blank line.
 (This can be useful to avoid the need to press `<cr>` manually in the terminal window.
 In `ipython`, for example, two `<cr>` are required to run an indented block.)
 
@@ -76,11 +76,12 @@ A mnemonic for `yr` is *you run*.
 
 ## Additional customization
 
-| Config                     | Default   | Description                         |
-| ------                     | -------   | -----------                         |
-| `g:ripple_window`          | `vnew`    | The command to open the REPL window |
-| `g:ripple_enable_mappings` | `1`       | Whether to enable default mappings  |
-| `g:ripple_highlight`       | `DiffAdd` | Highlight group                     |
+| Config                               | Default             | Description                           |
+| ------                               | -------             | -----------                           |
+| `g:ripple_window` (`nvim` only)      | `vnew`              | The command to open the REPL window   |
+| `g:ripple_term_command` (`vim` only) | `vertical terminal` | The command to open the REPL terminal |
+| `g:ripple_enable_mappings`           | `1`                 | Whether to enable default mappings    |
+| `g:ripple_highlight`                 | `DiffAdd`           | Highlight group                       |
 
 To disable th highlighting of code chunks sent to the REPL, simply `let g:ripple_highlight = ""`.
 Highlighting works only when the plugin [vim-highlightedyank](https://github.com/machakann/vim-highlightedyank) is installed.
