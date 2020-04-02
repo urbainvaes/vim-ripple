@@ -85,22 +85,23 @@ function! s:send_to_term(code, newline, add_cr)
     tab split
     execute "noautocmd buffer" s:term_buffer_nr
     norm G$
+    let bracketed_paste = [s:repl_params[1], s:repl_params[2]]
     if has("nvim")
-        let open_bracketed_paste = s:repl_params[1]
-        let close_bracketed_paste = s:repl_params[2]
-        put =open_bracketed_paste
+        put =bracketed_paste[0]
         put =code
-        put =close_bracketed_paste
+        put =bracketed_paste[1]
         if a:newline
             let newline = "\<cr>"
             put =newline
         endif
     else
-        let open_bracketed_paste = s:repl_params[1]
-        let close_bracketed_paste = s:repl_params[2]
         let newline = a:newline ? "\<cr>" : ""
-        let typed_string = "\<c-\>\<c-n>a".open_bracketed_paste.code.close_bracketed_paste.newline
+        let term_mode = mode()
+        let typed_string = "\<c-\>\<c-n>a".bracketed_paste[0].code.bracketed_paste[1].newline
         call feedkeys(typed_string, "ntx")
+        " if term_mode == 'n'
+        "     execute &termwinkey n
+        " endif
     endif
     tab close
 endfunction
