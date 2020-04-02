@@ -20,6 +20,11 @@
 " OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 " THE SOFTWARE.
 
+if exists('g:loaded_ripple') || &cp
+    finish
+endif
+let g:loaded_ripple = 1
+
 let s:default_enable_mappings = 1
 
 nnoremap <silent> <Plug>(ripple_open_repl) :call ripple#open_repl()<cr>
