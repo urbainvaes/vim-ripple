@@ -82,6 +82,7 @@ function! s:send_to_term(code, newline, add_cr)
 
     " Add <cr> (useful e.g. so that python functions get run)
     let code = (a:add_cr && s:repl_params[3]) ? a:code."\<cr>" : a:code
+    let tabnr = tabpagenr()
     tab split
     execute "noautocmd buffer" s:term_buffer_nr
     norm G$
@@ -104,6 +105,7 @@ function! s:send_to_term(code, newline, add_cr)
         " endif
     endif
     tab close
+    noautocmd execute 'tabnext' tabnr
 endfunction
 
 " Memory to execute previous code selection
