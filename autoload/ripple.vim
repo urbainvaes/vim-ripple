@@ -1,6 +1,6 @@
 " The MIT License (MIT)
 "
-" Copyright (c) 2018 Urbain Vaes
+" Copyright (c) 2020 Urbain Vaes
 "
 " Permission is hereby granted, free of charge, to any person obtaining a copy
 " of this software and associated documentation files (the "Software"), to deal
@@ -138,6 +138,11 @@ function! ripple#send_motion_or_selection(...)
         let s:end_file = a:1 == "char"
                     \ && s:line_end == line('$')
                     \ && s:column_end == strlen(getline(s:line_end))
+    endif
+
+    if a:1 == "p" && s:term_buffer_nr == -1
+        echom "No term buffer opened"
+        return -1
     endif
 
     let lines = getline(s:line_start, s:line_end)
