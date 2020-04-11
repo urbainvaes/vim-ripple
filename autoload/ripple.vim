@@ -51,11 +51,11 @@ function! ripple#open_repl()
     if has_key(repls, ft)
         let s:repl_params = repls[ft]
     else
-        echom "No repl for filetype" ft
+        echom "No repl for filetype ".ft."…"
         return -1
     endif
 
-    if type(s:repl_params) == 1  " If string
+    if type(s:repl_params) == 1
         let s:repl_params = [s:repl_params, "", "", 0]
     endif
 
@@ -100,9 +100,6 @@ function! s:send_to_term(code, newline, add_cr)
         let term_mode = mode()
         let typed_string = "\<c-\>\<c-n>a".bracketed_paste[0].code.bracketed_paste[1].newline
         call feedkeys(typed_string, "ntx")
-        " if term_mode == 'n'
-        "     execute &termwinkey n
-        " endif
     endif
     tab close
     noautocmd execute 'tabnext' tabnr
@@ -134,7 +131,7 @@ function! ripple#send_motion_or_selection(...)
         let s:end_paragraph = a:1 == "line"
                     \ && getline(s:line_end) != ""
                     \ && getline(s:line_end + 1) == ""
-        " To handle `yr}` at the endo of file
+        " To handle `yr}` at the end of file
         let s:end_file = a:1 == "char"
                     \ && s:line_end == line('$')
                     \ && s:column_end == strlen(getline(s:line_end))
@@ -152,14 +149,15 @@ function! ripple#send_motion_or_selection(...)
         let lines[0] = lines[0][s:column_start - 1:]
     endif
 
-    " Sometimes, for example with motion `}`, the line where the cursor
+    " Sometimes, for example with the motion `}`, the line where the cursor
     " lands is not included, which is often undesirable for this plugin.
-    " For example, running `yr}` on a Python function with an empty line
-    " after it will paste the code of the function but not execute it.
+    " For example, without an extra <cr>, running `yr}` on a Python function
+    " with an empty line after it will paste the code of the function but not
+    " execute it.
 
-    let add_cr = s:end_paragraph || s:end_file
     let code = join(lines, "\<cr>")
     let newline = s:end_file || !s:char_wise
+    let add_cr = s:end_paragraph || s:end_file
     call s:send_to_term(code, newline, add_cr)
 
     if a:1 == "line" || a:1 == "char"
