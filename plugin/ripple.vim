@@ -20,7 +20,7 @@
 " OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 " THE SOFTWARE.
 
-if exists('g:loaded_ripple') || &cp
+if exists('g:loaded_ripple') || &compatible
     finish
 endif
 let g:loaded_ripple = 1
