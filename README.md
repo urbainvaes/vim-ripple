@@ -83,7 +83,7 @@ A mnemonic for `yr` is *you run*.
 | `g:ripple_enable_mappings`           | `1`                 | Whether to enable default mappings    |
 | `g:ripple_highlight`                 | `DiffAdd`           | Highlight group                       |
 
-To disable th highlighting of code chunks sent to the REPL, simply `let g:ripple_highlight = ""`.
+To disable the highlighting of code chunks sent to the REPL, simply `let g:ripple_highlight = ""`.
 Highlighting works only when the plugin [vim-highlightedyank](https://github.com/machakann/vim-highlightedyank) is installed.
 
 ## License
