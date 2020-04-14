@@ -67,7 +67,7 @@ function! ripple#open_repl()
         let term_command = get(g:, 'ripple_term_command', s:default_term_command)
         silent execute term_command s:repl_params[0]
     endif
-    let s:term_buffer_nr = bufnr()
+    let s:term_buffer_nr = bufnr('%')
 
     execute winnr."wincmd w"
     execute "sleep" s:default_delay
