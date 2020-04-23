@@ -48,7 +48,9 @@ function! ripple#open_repl()
     if has_key(g:, 'ripple_repls')
         call extend(repls, g:ripple_repls)
     endif
-    if has_key(repls, ft)
+    if has_key(b:, 'ripple_repl')
+        let s:repl_params = b:ripple_repl
+    elseif has_key(repls, ft)
         let s:repl_params = repls[ft]
     else
         echom "No repl for filetype ".ft."…"
