@@ -30,11 +30,14 @@ let s:default_repls = {
             \ "sh": "bash"
             \ }
 
+" Memory for the state of the plugin
+let s:term_buffer_nr = -1
+
 function! ripple#status()
     if s:term_buffer_nr == -1
-        echom "No term buffer opened"
+        echom "No term buffer opened…"
     else
-        echom "Term buffer:" s:term_buffer_nr
+        echom "Term buffer:" s:term_buffer_nr."."
     endif
 endfunction
 
@@ -107,16 +110,6 @@ function! s:send_to_term(code, newline, add_cr)
     noautocmd execute 'tabnext' tabnr
 endfunction
 
-" Memory to execute previous code selection
-let s:term_buffer_nr = -1
-let s:is_visual = 0
-let s:charwise = 1
-let s:repl_params = []
-let [s:line_start, s:column_start] = [0, 0]
-let [s:line_end, s:column_end] = [0, 0]
-let s:end_paragraph = 0
-let s:end_file = 0
-
 " Argument is either
 " - "p": to repeat previous code selection
 " - "v" or "V": when called from v or V mode
@@ -124,7 +117,6 @@ let s:end_file = 0
 function! ripple#send_motion_or_selection(...)
     if a:1 != "p"
         let s:is_visual = (a:1 ==# "v" || a:1 ==# "V")
-        let s:char_wise = (a:1 ==# "char" || a:1 ==# "v")
         let m1 = s:is_visual ? "'<" : "'["
         let m2 = s:is_visual ? "'>" : "']"
         let [s:line_start, s:column_start] = getpos(l:m1)[1:2]
@@ -137,17 +129,24 @@ function! ripple#send_motion_or_selection(...)
         let s:end_file = a:1 == "char"
                     \ && s:line_end == line('$')
                     \ && s:column_end == strlen(getline(s:line_end))
+
+        let s:char_wise = (a:1 ==# "char" || a:1 ==# "v")
+        if s:char_wise && s:is_visual && &selection=='exclusive'
+            let s:column_end = s:column_end - 1
+        endif
     endif
 
     if a:1 == "p" && s:term_buffer_nr == -1
-        echom "No term buffer opened"
-        return -1
+        echom "No term buffer opened…"
+        return
+    elseif a:1 == "p" && !has_key(s:, 'line_start')
+        echom "No previous selection…"
+        return
     endif
 
     let lines = getline(s:line_start, s:line_end)
     if s:char_wise
-        let offset = (&selection == 'inclusive' ? 1 : 2)
-        let lines[-1] = lines[-1][:s:column_end - offset]
+        let lines[-1] = lines[-1][:s:column_end - 1]
         let lines[0] = lines[0][s:column_start - 1:]
     endif
 
