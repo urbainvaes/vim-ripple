@@ -180,6 +180,15 @@ function! s:update_state()
     endif
 endfunction
 
+function! ripple#send_buffer()
+    let s:mode = "line"
+    let [s:line_start, s:line_end] = [1, line('$')]
+    let [s:column_start, s:column_end] = [-1, -1]
+    let [s:end_paragraph, s:end_file] = [1, 0]
+    call s:send_code()
+    call s:highlight()
+endfunction
+
 function! ripple#send_visual()
     let s:mode = visualmode()
     call s:update_state()
