@@ -26,8 +26,13 @@ let s:default_term_command = "vertical terminal"
 let s:default_delay = "1000m"
 let s:default_repls = {
             \ "python": ["ipython", "\<c-u>\<esc>[200~", "\<esc>[201~", 1],
+            \ "julia": "julia",
+            \ "lua": "lua",
+            \ "r": "R",
+            \ "ruby": "irb",
             \ "scheme": "guile",
-            \ "sh": "bash"
+            \ "sh": "bash",
+            \ "zsh": "zsh",
             \ }
 
 " Memory for the state of the plugin
