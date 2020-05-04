@@ -23,7 +23,7 @@
 let s:default_highlight = "DiffAdd"
 let s:default_window = "vnew"
 let s:default_term_command = "vertical terminal"
-let s:default_delay = "1000m"
+let s:default_delay = "500m"
 let s:default_repls = {
             \ "python": ["ipython", "\<c-u>\<esc>[200~", "\<esc>[201~", 1],
             \ "julia": "julia",
@@ -81,6 +81,8 @@ function! ripple#open_repl()
         let new_window = get(g:, 'ripple_window', s:default_window)
         silent execute new_window
         silent execute "term" s:repl_params[0]
+        " Move cursor to last line to follow output
+        norm G
     else
         let term_command = get(g:, 'ripple_term_command', s:default_term_command)
         silent execute term_command s:repl_params[0]
@@ -106,10 +108,9 @@ function! s:send_code()
     " execute it.
     let code = join(s:lines(), "\<cr>")
     let add_newline = !s:is_charwise()
-    let add_cr = s:end_paragraph
 
     " Add <cr> (useful e.g. so that python functions get run)
-    let code = (add_cr && s:repl_params[3]) ? code."\<cr>" : code
+    let code = (s:is_end_paragraph() && s:repl_params[3]) ? code."\<cr>" : code
     let newline = add_newline ? "\<cr>" : ""
     let bracketed_paste = [s:repl_params[1], s:repl_params[2]]
     let formatted_code = bracketed_paste[0].code.bracketed_paste[1].newline
@@ -155,6 +156,12 @@ function! s:is_charwise()
     return (s:mode ==# "char" || s:mode ==# "v")
 endfunction
 
+function! s:is_end_paragraph()
+    return s:mode == "line"
+                \ && getline(s:line_end) != ""
+                \ && getline(s:line_end + 1) == ""
+endfunction
+
 function! s:lines()
     let lines = getline(s:line_start, s:line_end)
     if s:is_charwise() && len(lines) > 0
@@ -171,20 +178,23 @@ function! s:update_state()
     let [s:line_start, s:column_start] = getpos(l:m1)[1:2]
     let [s:line_end, s:column_end] = getpos(l:m2)[1:2]
 
-    let s:end_paragraph = s:mode == "line"
-                \ && getline(s:line_end) != ""
-                \ && getline(s:line_end + 1) == ""
-
     if s:is_charwise() && is_visual && &selection=='exclusive'
         let s:column_end = s:column_end - 1
     endif
+endfunction
+
+function! ripple#send_lines(l1, l2)
+    let s:mode = "line"
+    let [s:line_start, s:line_end] = [a:l1, a:l2]
+    let [s:column_start, s:column_end] = [-1, -1]
+    call s:send_code()
+    call s:highlight()
 endfunction
 
 function! ripple#send_buffer()
     let s:mode = "line"
     let [s:line_start, s:line_end] = [1, line('$')]
     let [s:column_start, s:column_end] = [-1, -1]
-    let s:end_paragraph = 1
     call s:send_code()
     call s:highlight()
 endfunction
