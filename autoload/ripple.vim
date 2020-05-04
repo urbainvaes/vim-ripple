@@ -157,7 +157,7 @@ endfunction
 
 function! s:lines()
     let lines = getline(s:line_start, s:line_end)
-    if s:is_charwise()
+    if s:is_charwise() && len(lines) > 0
         let lines[-1] = lines[-1][:s:column_end - 1]
         let lines[0] = lines[0][s:column_start - 1:]
     endif
