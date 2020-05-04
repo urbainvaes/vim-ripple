@@ -42,3 +42,5 @@ if get(g:, 'ripple_enable_mappings', s:default_enable_mappings)
     nmap yp <Plug>(ripple_send_previous)
     xmap R <Plug>(ripple_send_selection)
 endif
+
+command! -range -bang -nargs=* Ripple call ripple#send_lines(<line1>, <line2>)
