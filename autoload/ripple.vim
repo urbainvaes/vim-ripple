@@ -20,6 +20,7 @@
 " OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 " THE SOFTWARE.
 
+let s:default_autoinsert = 1
 let s:default_highlight = "DiffAdd"
 let s:default_window = "vnew"
 let s:default_term_command = "vertical terminal"
@@ -83,6 +84,9 @@ function! ripple#open_repl()
         silent execute "term" s:repl_params[0]
         " Move cursor to last line to follow output
         norm G
+        if &runtimepath =~ 'vim-tmux-pilot'
+            call pilot#autoinsert()
+        endif
     else
         let term_command = get(g:, 'ripple_term_command', s:default_term_command)
         silent execute term_command s:repl_params[0]
@@ -107,11 +111,10 @@ function! s:send_code()
     " with an empty line after it will paste the code of the function but not
     " execute it.
     let code = join(s:lines(), "\<cr>")
-    let add_newline = !s:is_charwise()
 
     " Add <cr> (useful e.g. so that python functions get run)
     let code = (s:is_end_paragraph() && s:repl_params[3]) ? code."\<cr>" : code
-    let newline = add_newline ? "\<cr>" : ""
+    let newline = s:is_charwise() ? "" : "\<cr>"
     let bracketed_paste = [s:repl_params[1], s:repl_params[2]]
     let formatted_code = bracketed_paste[0].code.bracketed_paste[1].newline
 
