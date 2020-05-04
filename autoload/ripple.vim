@@ -105,8 +105,8 @@ function! s:send_code()
     " with an empty line after it will paste the code of the function but not
     " execute it.
     let code = join(s:lines(), "\<cr>")
-    let add_newline = s:end_file || !s:is_charwise()
-    let add_cr = s:end_paragraph || s:end_file
+    let add_newline = !s:is_charwise()
+    let add_cr = s:end_paragraph
 
     " Add <cr> (useful e.g. so that python functions get run)
     let code = (add_cr && s:repl_params[3]) ? code."\<cr>" : code
@@ -175,11 +175,6 @@ function! s:update_state()
                 \ && getline(s:line_end) != ""
                 \ && getline(s:line_end + 1) == ""
 
-    " To handle `yr}` at the end of file
-    let s:end_file = s:mode == "char"
-                \ && s:line_end == line('$')
-                \ && s:column_end == strlen(getline(s:line_end))
-
     if s:is_charwise() && is_visual && &selection=='exclusive'
         let s:column_end = s:column_end - 1
     endif
@@ -189,7 +184,7 @@ function! ripple#send_buffer()
     let s:mode = "line"
     let [s:line_start, s:line_end] = [1, line('$')]
     let [s:column_start, s:column_end] = [-1, -1]
-    let [s:end_paragraph, s:end_file] = [1, 0]
+    let s:end_paragraph = 1
     call s:send_code()
     call s:highlight()
 endfunction
