@@ -72,7 +72,7 @@ function! ripple#open_repl()
     if s:term_buffer_nr != -1 && buffer_exists(s:term_buffer_nr)
         return
     endif
-    let winnr = winnr()
+    let winid = win_getid()
 
     if s:set_repl_params() == -1
         return -1
@@ -93,12 +93,10 @@ function! ripple#open_repl()
     endif
     let s:term_buffer_nr = bufnr('%')
 
-    execute winnr."wincmd w"
+    call win_gotoid(winid)
     execute "sleep" s:default_delay
     return 0
 endfunction
-
-" function! s:putcode(bracketed_paste)
 
 function! s:send_code()
     if ripple#open_repl() == -1
