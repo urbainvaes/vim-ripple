@@ -22,8 +22,7 @@
 
 let s:default_autoinsert = 1
 let s:default_highlight = "DiffAdd"
-let s:default_window = "vnew"
-let s:default_term_command = "vertical terminal"
+let s:default_winpos = "vertical"
 let s:default_delay = "500m"
 let s:default_repls = {
             \ "python": ["ipython", "\<c-u>\<esc>[200~", "\<esc>[201~", 1],
@@ -78,20 +77,53 @@ function! ripple#open_repl()
         return -1
     endif
 
+    let legacy = 'no'
+    if has_key(g:, 'ripple_window')
+        let legacy = 'g:ripple_window'
+    elseif has_key(g:, 'ripple_term_command')
+        let legacy = 'ripple_term_command'
+    endif
+    if legacy == 'no'
+        let winpos = get(g:, 'ripple_winpos', s:default_winpos)
+        if has("nvim")
+            silent execute winpos." new"
+            silent execute "term" s:repl_params[0]
+        else
+            silent execute winpos." term ".s:repl_params[0]
+        endif
+    else
+        " Legacy code
+        echohl Type
+        echon "vim-ripple: "
+        echohl Identifier
+        echon "'".legacy."'"
+        echohl None
+        echon " is deprecated; use "
+        echohl Identifier
+        echon "'g:ripple_winpos'"
+        echohl None
+        echon " instead.\<cr>"
+
+        let s:default_window = "vnew"
+        let s:default_term_command = "vertical terminal"
+        if has("nvim")
+            let new_window = get(g:, 'ripple_window', s:default_window)
+            silent execute new_window
+            silent execute "term" s:repl_params[0]
+        else
+            let term_command = get(g:, 'ripple_term_command', s:default_term_command)
+            silent execute term_command s:repl_params[0]
+        endif
+    endif
+    let s:term_buffer_nr = bufnr('%')
+
     if has("nvim")
-        let new_window = get(g:, 'ripple_window', s:default_window)
-        silent execute new_window
-        silent execute "term" s:repl_params[0]
         " Move cursor to last line to follow output
         norm G
         if &runtimepath =~ 'vim-tmux-pilot'
             call pilot#autoinsert()
         endif
-    else
-        let term_command = get(g:, 'ripple_term_command', s:default_term_command)
-        silent execute term_command s:repl_params[0]
     endif
-    let s:term_buffer_nr = bufnr('%')
 
     call win_gotoid(winid)
     execute "sleep" s:default_delay
@@ -118,7 +150,8 @@ function! s:send_code()
 
     let tabnr = tabpagenr()
     tab split
-    execute "noautocmd buffer" s:term_buffer_nr
+    " Silent for vim
+    silent execute "noautocmd buffer" s:term_buffer_nr
     norm G$
     if has("nvim")
         put =formatted_code

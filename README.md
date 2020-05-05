@@ -76,13 +76,13 @@ A mnemonic for `yr` is *you run*.
 
 ## Additional customization
 
-| Config                               | Default             | Description                           |
-| ------                               | -------             | -----------                           |
-| `g:ripple_window` (`nvim` only)      | `vnew`              | The command to open the REPL window   |
-| `g:ripple_term_command` (`vim` only) | `vertical terminal` | The command to open the REPL terminal |
-| `g:ripple_enable_mappings`           | `1`                 | Whether to enable default mappings    |
-| `g:ripple_highlight`                 | `DiffAdd`           | Highlight group                       |
+| Config                     | Default    | Description                        |
+| ------                     | -------    | -----------                        |
+| `g:ripple_winpos`          | `vertical` | Window position                    |
+| `g:ripple_enable_mappings` | `1`        | Whether to enable default mappings |
+| `g:ripple_highlight`       | `DiffAdd`  | Highlight group                    |
 
+The options `g:ripple_winpos` is the modifier to prepend to `new` (in `nvim`) or `term` (in `vim`) when opening the REPL window.
 To disable the highlighting of code chunks sent to the REPL, simply `let g:ripple_highlight = ""`.
 Highlighting works only when the plugin [vim-highlightedyank](https://github.com/machakann/vim-highlightedyank) is installed.
 
