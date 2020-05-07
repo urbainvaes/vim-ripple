@@ -43,4 +43,4 @@ if get(g:, 'ripple_enable_mappings', s:default_enable_mappings)
     xmap R <Plug>(ripple_send_selection)
 endif
 
-command! -range -bang -nargs=* Ripple call ripple#send_lines(<line1>, <line2>)
+command! -range -nargs=* Ripple call ripple#command(<line1>, <line2>, <q-args>)

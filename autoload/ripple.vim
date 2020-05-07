@@ -130,37 +130,46 @@ function! ripple#open_repl()
     return 0
 endfunction
 
-function! s:send_code()
-    if ripple#open_repl() == -1
-        return
-    endif
-
-    " Sometimes, for example with the motion `}`, the line where the cursor
-    " lands is not included, which is often undesirable for this plugin.
-    " For example, without an extra <cr>, running `yr}` on a Python function
-    " with an empty line after it will paste the code of the function but not
-    " execute it.
-    let code = join(s:lines(), "\<cr>")
-
-    " Add <cr> (useful e.g. so that python functions get run)
-    let code = (s:is_end_paragraph() && s:repl_params[3]) ? code."\<cr>" : code
-    let newline = s:is_charwise() ? "" : "\<cr>"
-    let bracketed_paste = [s:repl_params[1], s:repl_params[2]]
-    let formatted_code = bracketed_paste[0].code.bracketed_paste[1].newline
-
+function! s:send_to_buffer(formatted)
     let tabnr = tabpagenr()
     tab split
     " Silent for vim
     silent execute "noautocmd buffer" s:term_buffer_nr
     norm G$
     if has("nvim")
-        put =formatted_code
+        put =a:formatted
     else
-        let typed_string = "\<c-\>\<c-n>a".formatted_code
+        let typed_string = "\<c-\>\<c-n>a".a:formatted
         call feedkeys(typed_string, "ntx")
     endif
     tab close
     noautocmd execute 'tabnext' tabnr
+endfunction
+
+function! s:send_code(...)
+    " We need this here because this sets repl_params
+    if ripple#open_repl() == -1
+        return
+    endif
+
+    if a:0 == 0
+        " Sometimes, for example with the motion `}`, the line where the cursor
+        " lands is not included, which is often undesirable for this plugin.
+        " For example, without an extra <cr>, running `yr}` on a Python function
+        " with an empty line after it will paste the code of the function but not
+        " execute it.
+        let code = join(s:lines(), "\<cr>")
+
+        " Add <cr> (useful e.g. so that python functions get run)
+        let code = (s:is_end_paragraph() && s:repl_params[3]) ? code."\<cr>" : code
+        let newline = s:is_charwise() ? "" : "\<cr>"
+    else
+        let code = a:1
+        let newline = "\<cr>"
+    endif
+    let bracketed_paste = [s:repl_params[1], s:repl_params[2]]
+    let formatted_code = bracketed_paste[0].code.bracketed_paste[1].newline
+    call s:send_to_buffer(formatted_code)
 endfunction
 
 function! s:highlight()
@@ -217,7 +226,15 @@ function! s:update_state()
     endif
 endfunction
 
-function! ripple#send_lines(l1, l2)
+function! ripple#command(l1, l2, text)
+    if a:text != ""
+        call s:send_code(a:text)
+    else
+        call s:send_lines(a:l1, a:l2)
+    endif
+endfunction
+
+function! s:send_lines(l1, l2)
     let s:mode = "line"
     let [s:line_start, s:line_end] = [a:l1, a:l2]
     let [s:column_start, s:column_end] = [-1, -1]
