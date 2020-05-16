@@ -85,6 +85,11 @@ A mnemonic for `yr` is *you run*.
 The options `g:ripple_winpos` is the modifier to prepend to `new` (in `nvim`) or `term` (in `vim`) when opening the REPL window.
 To disable the highlighting of code chunks sent to the REPL, simply `let g:ripple_highlight = ""`.
 Highlighting works only when the plugin [vim-highlightedyank](https://github.com/machakann/vim-highlightedyank) is installed.
+For more information, see
+
+```vim
+:help ripple
+```
 
 ## License
 

@@ -28,22 +28,43 @@ COMMANDS                                                      *ripple-commands*
 :[range] Ripple [text]
     If the argument [text] is specified, send it to the REPL. Else, if the
     command is called with a [range], send the corresponding line range in
-    the current buffer to the REPL. 
+    the current buffer to the REPL.
 
+    It can be convenient to combine this command with a mapping, e.g. >
+        nnoremap yrc :Ripple clear<cr>
 
 ==============================================================================
 MAPPINGS                                                      *ripple-mappings*
 
 Global~
 
-<Plug>(ripple_open_repl)
-    Open the REPL window.
+The <Plug> mappings are always defined, but the mappings to physical keys are
+enabled only if |g:ripple_enable_mappings| is set to `1`.
 
-<Plug>(ripple_send_motion) ripple#send_motion()
-<Plug>(ripple_send_previous) :call ripple#send_previous()<cr>
-<Plug>(ripple_send_buffer) :call ripple#send_buffer()<cr>
-<Plug>(ripple_send_selection) :<c-u>call ripple#send_visual()<cr>
-<Plug>(ripple_send_line) <Plug>(ripple_send_motion)_
+<Plug>(ripple_open_repl), |y<cr>|
+    Open the REPL window (Normal mode mapping).
+    Mnemonic: "you enter (the REPL)"
+
+<Plug>(ripple_send_motion), |yr|
+    Send text object to the REPL window (Normal mode mapping).
+    Mnemonic: "you run".
+
+<Plug>(ripple_send_selection), |R|
+    Send text object to the REPL window (Visual mode mapping).
+    Mnemonic: "run".
+
+<Plug>(ripple_send_previous), |yp|
+    Resend the latest selection sent to the REPL. More precisely, send the
+    code that is currently at the location of the latest code chunk sent to
+    the REPL. If the contents of the buffer changed in the meantime, this code
+    might be different from the latest code chunk.
+
+<Plug>(ripple_send_buffer), |y<cr>|
+    Send the whole buffer to the REPL.
+
+<Plug>(ripple_send_line), |yrr|
+    Send the current line to the REPL. This is equivalent to >
+        <Plug>(ripple_send_motion)_
 
 ==============================================================================
 CONFIGURATION                                                   *ripple-config*
@@ -55,39 +76,40 @@ Global configuration~
     |b:ripple_repl| below.
 
     Internally, a REPL configuration for a given filetype is a combination of
-    four values:
-          - A command to start the REPL;
-          - A pair strings to prepend and append to code sent to the REPL,
-            respectively. This is sometimes necessary to enable sending
-            several lines of code to the REPL at once.
-          - A boolean that controls whether an additional `<cr>` should be
-            appended to the code chunks that are followed by a blank line.
-            (This can be useful to avoid the need to press `<cr>` manually in
-            the terminal window. In `ipython`, for example, two `<cr>` are
+    four variables:
+          - A {command} to start the REPL;
+          - A pair of strings {string1} and {string2} to prepend and append to
+            code sent to the REPL, respectively. This is sometimes necessary
+            to enable sending several lines of code to the REPL at once.
+          - A boolean {extra_cr} that controls whether an additional <cr>
+            should be appended to the code chunks that are followed by a blank
+            line. (This can be useful to avoid the need to press <cr> manually
+            in the terminal window. In ipython, for example, two <cr> are
             required to run an indented block.)
 
     In the dictionary |g:ripple_repl|, the keys are |filetype|s and the values
     are either of the following:
-        - A string containing the command to start the REPL (e.g. `bash`, `guile`).
-          In this case the strings to append and prepend to code chunks sent
-          to the REPL are assumed to be the empty string.
-        - A list of three string entries and a boolean entry:
-              - The first string must contain the command to start the REPL;
-              - The second and third must contain strings to prepend and
-                append to code sent to the REPL, respectively. This is
-                sometimes necessary to enable sending several lines of code to
-                the REPL at once.
-              - The fourth element must be either 0 or 1, and it controls
-                whether an additional `<cr>` should be appended to the code
-                chunks that are followed by a blank line. (This can be useful
-                to avoid the need to press `<cr>` manually in the terminal
-                window. In `ipython`, for example, two `<cr>` are required to
-                run an indented block.)
+        - A string containing the {command} to start the REPL (e.g. 'bash',
+          'guile'). In this case the other parameters are assumed to be as
+          follows: {string1} = "",  {string2} = "" and {extra_cr} = 0.
+        - A list of with four entries:
+              [{command}, {string1}, {string2}, {extra_cr}]
+
+    Default: >
+       {  "python": ["ipython", "\<c-u>\<esc>[200~", "\<esc>[201~", 1],
+        \ "julia": "julia",
+        \ "lua": "lua",
+        \ "r": "R",
+        \ "ruby": "irb",
+        \ "scheme": "guile",
+        \ "sh": "bash",
+        \ "zsh": "zsh"}
 
 *g:ripple_winpos*
     Modifier for the window position. In nvim, this modifier is prepended to
     the |new| command when opening the terminal window. In vim, it is
     prepended to the |term| command.
+    Default: 'vertical'.
 
 *g:ripple_enable_mappings*
     Set this to 0 to disable all mappings apart from the <plug> mappings.
@@ -95,13 +117,13 @@ Global configuration~
 
 *g:ripple_highlight*
     Highlight group employed to highlight text objects sent to the REPL.
-    Default: 'DiffAdd'.
+    Default: '|DiffAdd|'.
 
 Buffer-local configuration~
 
 *b:ripple_repl*
-
+    REPL configuration for current buffer. This takes precedence over
+    the global option `g:ripple_repls[&filetype]`.
 
 ==============================================================================
-
  vim:tw=78:ts=4:et:ft=help:norl:
