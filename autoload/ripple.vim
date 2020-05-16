@@ -158,7 +158,11 @@ function! s:send_code(...)
         " For example, without an extra <cr>, running `yr}` on a Python function
         " with an empty line after it will paste the code of the function but not
         " execute it.
-        let code = join(s:lines(), "\<cr>")
+        let lines = s:lines()
+        if empty(lines)
+            return
+        endif
+        let code = join(lines, "\<cr>")
 
         " Add <cr> (useful e.g. so that python functions get run)
         let code = (s:is_end_paragraph() && s:repl_params[3]) ? code."\<cr>" : code
@@ -173,6 +177,9 @@ function! s:send_code(...)
 endfunction
 
 function! s:highlight()
+    if bufnr("%") != s:source_bufnr
+        return
+    endif
     let higroup = get(g:, 'ripple_highlight', s:default_highlight)
     if &runtimepath =~ 'highlightedyank' && higroup != ""
         let start = [0, s:line_start, s:column_start, 0]
@@ -206,7 +213,11 @@ function! s:is_end_paragraph()
 endfunction
 
 function! s:lines()
-    let lines = getline(s:line_start, s:line_end)
+    if !buflisted(s:source_bufnr)
+        echom "Buffer no longer exists…"
+        return []
+    endif
+    let lines = getbufline(s:source_bufnr, s:line_start, s:line_end)
     if s:is_charwise() && len(lines) > 0
         let lines[-1] = lines[-1][:s:column_end - 1]
         let lines[0] = lines[0][s:column_start - 1:]
@@ -220,6 +231,7 @@ function! s:update_state()
     let m2 = is_visual ? "'>" : "']"
     let [s:line_start, s:column_start] = getpos(l:m1)[1:2]
     let [s:line_end, s:column_end] = getpos(l:m2)[1:2]
+    let s:source_bufnr = bufnr("%")
 
     if s:is_charwise() && is_visual && &selection=='exclusive'
         let s:column_end = s:column_end - 1
@@ -230,6 +242,7 @@ function! s:send_lines(l1, l2)
     let s:mode = "line"
     let [s:line_start, s:line_end] = [a:l1, a:l2]
     let [s:column_start, s:column_end] = [-1, -1]
+    let s:source_bufnr = bufnr("%")
     call s:send_code()
     call s:highlight()
 endfunction
@@ -246,6 +259,7 @@ function! ripple#send_buffer()
     let s:mode = "line"
     let [s:line_start, s:line_end] = [1, line('$')]
     let [s:column_start, s:column_end] = [-1, -1]
+    let s:source_bufnr = bufnr("%")
     call s:send_code()
     call s:highlight()
 endfunction
