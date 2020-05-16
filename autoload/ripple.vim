@@ -226,20 +226,20 @@ function! s:update_state()
     endif
 endfunction
 
-function! ripple#command(l1, l2, text)
-    if a:text != ""
-        call s:send_code(a:text)
-    else
-        call s:send_lines(a:l1, a:l2)
-    endif
-endfunction
-
 function! s:send_lines(l1, l2)
     let s:mode = "line"
     let [s:line_start, s:line_end] = [a:l1, a:l2]
     let [s:column_start, s:column_end] = [-1, -1]
     call s:send_code()
     call s:highlight()
+endfunction
+
+function! ripple#command(l1, l2, text)
+    if a:text != ""
+        call s:send_code(a:text)
+    else
+        call s:send_lines(a:l1, a:l2)
+    endif
 endfunction
 
 function! ripple#send_buffer()
