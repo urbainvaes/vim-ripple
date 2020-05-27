@@ -122,6 +122,9 @@ Global configuration~
 *g:ripple_term_name*
     Name of the REPL buffer.
 
+*g:ripple_term_options* (vim only)
+    Dictionary with additional options to pass to `term_start()`.
+
 Buffer-local configuration~
 
 *b:ripple_repl*

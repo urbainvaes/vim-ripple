@@ -104,6 +104,9 @@ function! ripple#open_repl()
             if term_name != ""
                 let term_options["term_name"] = term_name
             endif
+            if has_key(g:, 'ripple_term_options')
+                call extend(term_options, g:ripple_term_options)
+            endif
             silent call term_start(s:repl_params[0], term_options)
         endif
     else
