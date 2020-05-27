@@ -85,11 +85,26 @@ function! ripple#open_repl()
     endif
     if legacy == 'no'
         let winpos = get(g:, 'ripple_winpos', s:default_winpos)
+
+        let term_name = ""
+        if has_key(b:, 'ripple_term_name')
+            let term_name = b:ripple_term_name
+        elseif has_key(g:, 'ripple_term_name')
+            let term_name = g:ripple_term_name
+        endif
+
+        silent execute winpos." new"
         if has("nvim")
-            silent execute winpos." new"
             silent execute "term" s:repl_params[0]
+            if term_name != ""
+                exec "file ".term_name
+            endif
         else
-            silent execute winpos." term ".s:repl_params[0]
+            let term_options = {"curwin": 1}
+            if term_name != ""
+                let term_options["term_name"] = term_name
+            endif
+            silent call term_start(s:repl_params[0], term_options)
         endif
     else
         " Legacy code

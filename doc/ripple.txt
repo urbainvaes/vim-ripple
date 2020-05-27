@@ -119,11 +119,18 @@ Global configuration~
     Highlight group employed to highlight text objects sent to the REPL.
     Default: '|DiffAdd|'.
 
+*g:ripple_term_name*
+    Name of the REPL buffer.
+
 Buffer-local configuration~
 
 *b:ripple_repl*
     REPL configuration for current buffer. This takes precedence over
     the global option `g:ripple_repls[&filetype]`.
+
+*b:ripple_term_name*
+    Name of the REPL buffer. This takes precedence over
+    the global option `g:ripple_term_name`.
 
 ==============================================================================
  vim:tw=78:ts=4:et:ft=help:norl:
