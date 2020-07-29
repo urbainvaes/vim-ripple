@@ -69,6 +69,7 @@ then additional mappings to keys are defined as follows:
 | `<Plug>(ripple_send_previous)`  | `yp` (`nmap`)       | Resend previous code block |
 | `<Plug>(ripple_send_selection)` | `R` (`xmap`)        | Send selection to REPL     |
 | `<Plug>(ripple_send_line)`      | `yrr` (`nmap`)      | Send line to REPL          |
+| `<Plug>(ripple_send_buffer)`    | `yr<cr>` (`nmap`)   | Send whole buffer to REPL  |
 
 If `<Plug>(ripple_send_motion)` is issued but no REPL is open,
 a REPL will open automatically.

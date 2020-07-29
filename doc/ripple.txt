@@ -59,7 +59,7 @@ enabled only if |g:ripple_enable_mappings| is set to `1`.
     the REPL. If the contents of the buffer changed in the meantime, this code
     might be different from the latest code chunk.
 
-<Plug>(ripple_send_buffer), |y<cr>|
+<Plug>(ripple_send_buffer), |yr<cr>|
     Send the whole buffer to the REPL.
 
 <Plug>(ripple_send_line), |yrr|
