@@ -36,13 +36,16 @@ let s:default_repls = {
             \ }
 
 " Memory for the state of the plugin
-let s:term_buffer_nr = -1
+let s:source = {}
+let s:term_buffer_nr = {}
+let s:repl_params = {}
+let s:ft = -1
 
 function! ripple#status()
-    if s:term_buffer_nr == -1
-        echom "No term buffer opened…"
+    if !has_key(s:term_buffer_nr, &ft)
+        echom "No term buffer opened for filetype '".&ft."'…"
     else
-        echom "Term buffer:" s:term_buffer_nr."."
+        echom "Term buffer:" s:term_buffer_nr[&ft]."."
     endif
 endfunction
 
@@ -63,12 +66,13 @@ function! s:set_repl_params()
         let repl = [repl, "", "", 0]
     endif
 
-    let s:repl_params = repl
+    let s:repl_params[&ft] = repl
     return 0
 endfunction
 
 function! ripple#open_repl()
-    if s:term_buffer_nr != -1 && buffer_exists(s:term_buffer_nr)
+    let ft = &ft
+    if has_key(s:term_buffer_nr, ft) && buffer_exists(s:term_buffer_nr[ft])
         return
     endif
     let winid = win_getid()
@@ -89,13 +93,19 @@ function! ripple#open_repl()
         let term_name = ""
         if has_key(b:, 'ripple_term_name')
             let term_name = b:ripple_term_name
+        elseif has_key(g:, 'ripple_term_name_root')
+            let term_name = g:ripple_term_name_root."_".&ft
         elseif has_key(g:, 'ripple_term_name')
             let term_name = g:ripple_term_name
+            if bufexists(term_name)
+                echom "Buffer '".term_name."' already exists, appending _".&ft."…"
+                let term_name = term_name."_".&ft
+            endif
         endif
 
         silent execute winpos." new"
         if has("nvim")
-            silent execute "term" s:repl_params[0]
+            silent execute "term" s:repl_params[ft][0]
             if term_name != ""
                 exec "file ".term_name
             endif
@@ -107,7 +117,7 @@ function! ripple#open_repl()
             if has_key(g:, 'ripple_term_options')
                 call extend(term_options, g:ripple_term_options)
             endif
-            silent call term_start(s:repl_params[0], term_options)
+            silent call term_start(s:repl_params[ft][0], term_options)
         endif
     else
         " Legacy code
@@ -127,13 +137,13 @@ function! ripple#open_repl()
         if has("nvim")
             let new_window = get(g:, 'ripple_window', s:default_window)
             silent execute new_window
-            silent execute "term" s:repl_params[0]
+            silent execute "term" s:repl_params[ft][0]
         else
             let term_command = get(g:, 'ripple_term_command', s:default_term_command)
-            silent execute term_command s:repl_params[0]
+            silent execute term_command s:repl_params[ft][0]
         endif
     endif
-    let s:term_buffer_nr = bufnr('%')
+    let s:term_buffer_nr[ft] = bufnr('%')
 
     if has("nvim")
         " Move cursor to last line to follow output
@@ -148,11 +158,15 @@ function! ripple#open_repl()
     return 0
 endfunction
 
-function! s:send_to_buffer(formatted)
+function! s:send_to_buffer(formatted, ft)
+    if !has_key(s:term_buffer_nr, &ft)
+        echom "No term buffer opened for filetype '".a:ft."'…"
+        return —1
+    endif
     let tabnr = tabpagenr()
     tab split
     " Silent for vim
-    silent execute "noautocmd buffer" s:term_buffer_nr
+    silent execute "noautocmd buffer" s:term_buffer_nr[a:ft]
     norm G$
     if has("nvim")
         put =a:formatted
@@ -169,100 +183,89 @@ function! s:send_code(...)
     if ripple#open_repl() == -1
         return
     endif
-
     if a:0 == 0
-        " Sometimes, for example with the motion `}`, the line where the cursor
-        " lands is not included, which is often undesirable for this plugin.
-        " For example, without an extra <cr>, running `yr}` on a Python function
-        " with an empty line after it will paste the code of the function but not
-        " execute it.
-        let lines = s:lines()
-        if empty(lines)
-            return
-        endif
-        let code = join(lines, "\<cr>")
-
         " Add <cr> (useful e.g. so that python functions get run)
-        let code = (s:is_end_paragraph() && s:repl_params[3]) ? code."\<cr>" : code
+        let code = s:extract_code()
+        let code = (s:is_end_paragraph() && s:repl_params[s:ft][3]) ? code."\<cr>" : code
         let newline = s:is_charwise() ? "" : "\<cr>"
     else
         let code = a:1
         let newline = "\<cr>"
     endif
-    let bracketed_paste = [s:repl_params[1], s:repl_params[2]]
+    let bracketed_paste = [s:repl_params[s:ft][1], s:repl_params[s:ft][2]]
     let formatted_code = bracketed_paste[0].code.bracketed_paste[1].newline
-    call s:send_to_buffer(formatted_code)
+    call s:send_to_buffer(formatted_code, s:ft)
+endfunction
+
+function! s:is_charwise()
+    let mode = s:source[s:ft]['mode']
+    return (mode ==# "char" || mode ==# "v")
+endfunction
+
+function! s:is_end_paragraph()
+    let source = s:source[s:ft]
+    return source['mode'] == "line"
+                \ && getline(source['line_end']) != ""
+                \ && getline(source['line_end'] + 1) == ""
+endfunction
+
+function! s:extract_code()
+    let source = s:source[s:ft]
+    let lines = getbufline(source['bufnr'], source['line_start'], source['line_end'])
+    if s:is_charwise() && len(lines) > -1
+        let lines[-1] = lines[-1][:source['column_end'] - 1]
+        let lines[0] = lines[0][source['column_start'] - 1:]
+    endif
+    " Sometimes, for example with the motion `}`, the line where the cursor
+    " lands is not included, which is often undesirable for this plugin.
+    " For example, without an extra <cr>, running `yr}` on a Python function
+    " with an empty line after it will paste the code of the function but not
+    " execute it.
+    if empty(lines)
+        return
+    endif
+    let code = join(lines, "\<cr>")
+    return code
 endfunction
 
 function! s:highlight()
-    if bufnr("%") != s:source_bufnr
+    let source = s:source[s:ft]
+    if bufnr("%") != source['bufnr']
         return
     endif
     let higroup = get(g:, 'ripple_highlight', s:default_highlight)
     if &runtimepath =~ 'highlightedyank' && higroup != ""
-        let start = [0, s:line_start, s:column_start, 0]
-        let end = [0, s:line_end, s:column_end, 0]
+        let start = [0, source['line_start'], source['column_start'], 0]
+        let end = [0, source['line_end'], source['column_end'], 0]
         let type = s:is_charwise() ? 'v' : 'V'
         let delay = 1000
         call highlightedyank#highlight#add(higroup, start, end, type, delay)
     endif
 endfunction
 
-function! ripple#send_previous()
-    if s:term_buffer_nr == -1
-        echom "No term buffer opened…"
-        return
-    elseif !has_key(s:, 'line_start')
-        echom "No previous selection…"
-        return
-    endif
+function! s:send_lines(l1, l2)
+    let s:ft = &ft
+    let s:source[s:ft] = {}
+    let source = s:source[s:ft]
+    let source['mode'] = "line"
+    let [source['line_start'], source['line_end']] = [a:l1, a:l2]
+    let [source['column_start'], source['column_end']] = [-1, -1]
+    let source['bufnr'] = bufnr("%")
     call s:send_code()
     call s:highlight()
 endfunction
 
-function! s:is_charwise()
-    return (s:mode ==# "char" || s:mode ==# "v")
-endfunction
-
-function! s:is_end_paragraph()
-    return s:mode == "line"
-                \ && getline(s:line_end) != ""
-                \ && getline(s:line_end + 1) == ""
-endfunction
-
-function! s:lines()
-    if !buflisted(s:source_bufnr)
-        echom "Buffer no longer exists…"
-        return []
-    endif
-    let lines = getbufline(s:source_bufnr, s:line_start, s:line_end)
-    if s:is_charwise() && len(lines) > 0
-        let lines[-1] = lines[-1][:s:column_end - 1]
-        let lines[0] = lines[0][s:column_start - 1:]
-    endif
-    return lines
-endfunction
-
-function! s:update_state()
-    let is_visual = (s:mode ==# "v" || s:mode ==# "V")
+function! s:extract_source()
+    let source = s:source[s:ft]
+    let is_visual = (source['mode'] ==# "v" || source['mode'] ==# "V")
     let m1 = is_visual ? "'<" : "'["
     let m2 = is_visual ? "'>" : "']"
-    let [s:line_start, s:column_start] = getpos(l:m1)[1:2]
-    let [s:line_end, s:column_end] = getpos(l:m2)[1:2]
-    let s:source_bufnr = bufnr("%")
-
+    let [source['line_start'], source['column_start']] = getpos(l:m1)[1:2]
+    let [source['line_end'], source['column_end']] = getpos(l:m2)[1:2]
+    let source['bufnr'] = bufnr("%")
     if s:is_charwise() && is_visual && &selection=='exclusive'
-        let s:column_end = s:column_end - 1
+        let source['column_end'] = source['column_end'] - 1
     endif
-endfunction
-
-function! s:send_lines(l1, l2)
-    let s:mode = "line"
-    let [s:line_start, s:line_end] = [a:l1, a:l2]
-    let [s:column_start, s:column_end] = [-1, -1]
-    let s:source_bufnr = bufnr("%")
-    call s:send_code()
-    call s:highlight()
 endfunction
 
 function! ripple#command(l1, l2, text)
@@ -273,25 +276,48 @@ function! ripple#command(l1, l2, text)
     endif
 endfunction
 
+function! ripple#send_previous()
+    if !has_key(s:term_buffer_nr, &ft)
+        echom "No term buffer opened for filetype '".&ft."'…"
+        return -1
+    elseif !has_key(s:source, &ft)
+        echom "No previous selection for filetype '".&ft."'…"
+        return -1
+    elseif !buflisted(s:source[&ft]['bufnr'])
+        echom "Buffer no longer exists…"
+        return -1
+    endif
+    let s:ft = &ft
+    call s:send_code()
+    call s:highlight()
+endfunction
+
 function! ripple#send_buffer()
-    let s:mode = "line"
-    let [s:line_start, s:line_end] = [1, line('$')]
-    let [s:column_start, s:column_end] = [-1, -1]
-    let s:source_bufnr = bufnr("%")
+    let s:ft = &ft
+    let s:source[s:ft] = {}
+    let source = s:source[s:ft]
+    let source["mode"] = "line"
+    let [source['line_start'], source['line_end']] = [1, line('$')]
+    let [source['column_start'], source['column_end']] = [-1, -1]
+    let source['bufnr'] = bufnr("%")
     call s:send_code()
     call s:highlight()
 endfunction
 
 function! ripple#send_visual()
-    let s:mode = visualmode()
-    call s:update_state()
+    let s:ft = &ft
+    let s:source[s:ft] = {}
+    let s:source[s:ft]['mode'] = visualmode()
+    call s:extract_source()
     call s:send_code()
     call s:highlight()
 endfunction
 
 function! ripple#accept_motion(...)
-    let s:mode = a:1
-    call s:update_state()
+    let s:ft = &ft
+    let s:source[s:ft] = {}
+    let s:source[s:ft]['mode'] = a:1
+    call s:extract_source()
     call s:send_code()
     call s:highlight()
     call setpos('.', s:save_cursor)
