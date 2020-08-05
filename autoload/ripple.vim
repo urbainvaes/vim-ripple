@@ -313,6 +313,11 @@ function! ripple#send_visual()
     call s:highlight()
 endfunction
 
+function! ripple#save()
+    let s:save_cursor = getcurpos()
+    let s:save_view = winsaveview()
+endfunction
+
 function! ripple#accept_motion(...)
     let s:ft = &ft
     let s:source[s:ft] = {}
@@ -322,11 +327,11 @@ function! ripple#accept_motion(...)
     call s:highlight()
     call setpos('.', s:save_cursor)
     call winrestview(s:save_view)
+    silent! call repeat#set(":\<c-u>call ripple#save() \<bar> norm! .\<cr>", v:count)
 endfunction
 
 function! ripple#send_motion()
-    let s:save_cursor = getcurpos()
-    let s:save_view = winsaveview()
+    call ripple#save()
     set operatorfunc=ripple#accept_motion
     return 'g@'
 endfunction
