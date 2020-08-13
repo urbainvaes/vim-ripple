@@ -24,6 +24,11 @@ let s:default_autoinsert = 1
 let s:default_highlight = "DiffAdd"
 let s:default_winpos = "vertical"
 let s:default_delay = "500m"
+
+function! s:remove_comments(code)
+    return substitute(a:code, "^#[^\r]*\r\\|\r#[^\r]*", "", "g")
+endfunction
+
 let s:default_repls = {
             \ "python": ["ipython", "\<c-u>\<esc>[200~", "\<esc>[201~", 1],
             \ "julia": "julia",
@@ -32,7 +37,7 @@ let s:default_repls = {
             \ "ruby": "irb",
             \ "scheme": "guile",
             \ "sh": "bash",
-            \ "zsh": "zsh",
+            \ "zsh": ["zsh", "", "", 0, function('s:remove_comments')],
             \ }
 
 " Memory for the state of the plugin
@@ -50,22 +55,22 @@ function! ripple#status()
 endfunction
 
 function! s:set_repl_params()
-    let repls = deepcopy(s:default_repls)
-    if has_key(g:, 'ripple_repls')
-        call extend(repls, g:ripple_repls)
-    endif
     if has_key(b:, 'ripple_repl')
         let repl = b:ripple_repl
-    elseif has_key(repls, &ft)
-        let repl = repls[&ft]
     else
-        echom "No repl for filetype '".&ft."'…"
-        return -1
-    endif
+        let repls = deepcopy(s:default_repls)
+        if has_key(g:, 'ripple_repls')
+            call extend(repls, g:ripple_repls)
+        endif
+        if has_key(repls, &ft)
+            let repl = repls[&ft]
+        else
+            echom "No repl for filetype '".&ft."'…"
+            return -1
+        endif
     if type(repl) == 1
         let repl = [repl, "", "", 0]
     endif
-
     let s:repl_params[&ft] = repl
     return 0
 endfunction
@@ -188,6 +193,9 @@ function! s:send_code(...)
         let code = s:extract_code()
         let code = (s:is_end_paragraph() && s:repl_params[s:ft][3]) ? code."\<cr>" : code
         let newline = s:is_charwise() ? "" : "\<cr>"
+        if len(s:repl_params[s:ft]) == 5
+            let code = s:repl_params[s:ft][4](code)
+        endif
     else
         let code = a:1
         let newline = "\<cr>"
