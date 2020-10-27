@@ -47,12 +47,27 @@ and it controls whether an additional `<cr>` should be appended to the code chun
 (This can be useful to avoid the need to press `<cr>` manually in the terminal window.
 In `ipython`, for example, two `<cr>` are required to run an indented block.)
 
+- A list with 5 entries, with the first four being as in the previous item and
+the last one being a function employed to format the code before sending it to the REPL. 
+For example, this is used in the default settings below to remove comments from `zsh` code chunks,
+which is useful because coments are not allowed in interactive shells by default 
+(this can be changed using `setopt interactivecomments`).
+
 The current default is the following:
 ```vim
+function! s:remove_comments(code)
+    return substitute(a:code, "^#[^\r]*\r\\|\r#[^\r]*", "", "g")
+endfunction
+
 let s:default_repls = {
             \ "python": ["ipython", "\<c-u>\<esc>[200~", "\<esc>[201~", 1],
+            \ "julia": "julia",
+            \ "lua": "lua",
+            \ "r": "R",
+            \ "ruby": "irb",
             \ "scheme": "guile",
-            \ "sh": "bash"
+            \ "sh": "bash",
+            \ "zsh": ["zsh", "", "", 0, function('s:remove_comments')],
             \ }
 ```
 
