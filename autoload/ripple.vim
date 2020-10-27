@@ -252,19 +252,17 @@ function! s:highlight()
     endif
 endfunction
 
-function! s:new_source(ft)
+function! s:new_source(ft, index)
     if !has_key(s:source, a:ft)
-        let s:source[a:ft] = []
-    elseif len(s:source[a:ft]) == 10
-        call remove(s:source[a:ft], -1)
+        let s:source[a:ft] = {}
     endif
-    call insert(s:source[a:ft], {}, 0)
-    return s:source[a:ft][0]
+    let s:source[a:ft][a:index] = {}
+    return s:source[a:ft][a:index]
 endfunction
 
 function! s:send_lines(l1, l2)
     let s:ft = &ft
-    let source = s:new_source(s:ft)
+    let source = s:new_source(s:ft, 0)
     let source['mode'] = "line"
     let [source['line_start'], source['line_end']] = [a:l1, a:l2]
     let [source['column_start'], source['column_end']] = [-1, -1]
@@ -301,15 +299,15 @@ function! ripple#send_previous()
     elseif !has_key(s:source, &ft)
         echom "No previous selection for filetype '".&ft."'…"
         return -1
-    elseif v:count1 - 1 >= len(s:source[&ft])
-        echom "Count too high…"
+    elseif !has_key(s:source[&ft], v:count)
+        echom "Register is empty…"
         return -1
-    elseif !buflisted(s:source[&ft][s:index]['bufnr'])
+    elseif !buflisted(s:source[&ft][v:count]['bufnr'])
         echom "Buffer no longer exists…"
         return -1
     endif
     let s:ft = &ft
-    let s:index = v:count1 - 1
+    let s:index = v:count
     call s:send_code()
     call s:highlight()
     let s:index = 0
@@ -317,7 +315,8 @@ endfunction
 
 function! ripple#send_buffer()
     let s:ft = &ft
-    let source = s:new_source(s:ft)
+    let s:index = v:count
+    let source = s:new_source(s:ft, s:index)
     let source["mode"] = "line"
     let [source['line_start'], source['line_end']] = [1, line('$')]
     let [source['column_start'], source['column_end']] = [-1, -1]
@@ -328,7 +327,8 @@ endfunction
 
 function! ripple#send_visual()
     let s:ft = &ft
-    let source = s:new_source(s:ft)
+    let s:index = v:count
+    let source = s:new_source(s:ft, s:index)
     let source['mode'] = visualmode()
     call s:extract_source()
     call s:send_code()
@@ -342,9 +342,13 @@ endfunction
 
 function! ripple#accept_motion(...)
     let s:ft = &ft
-    let source = s:new_source(s:ft)
+    let s:index = v:count
+    let source = s:new_source(s:ft, s:index)
+    echom s:index
+    echom s:source
     let source['mode'] = visualmode()
     call s:extract_source()
+    echom s:source
     call s:send_code()
     call s:highlight()
     call setpos('.', s:save_cursor)
