@@ -344,11 +344,8 @@ function! ripple#accept_motion(...)
     let s:ft = &ft
     let s:index = v:count
     let source = s:new_source(s:ft, s:index)
-    echom s:index
-    echom s:source
-    let source['mode'] = visualmode()
+    let source['mode'] = a:1
     call s:extract_source()
-    echom s:source
     call s:send_code()
     call s:highlight()
     call setpos('.', s:save_cursor)
