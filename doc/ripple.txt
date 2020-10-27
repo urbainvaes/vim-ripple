@@ -64,12 +64,12 @@ enabled only if |g:ripple_enable_mappings| is set to `1`.
     changed in the meantime, this code might be different from the latest code
     chunk.
 
+["x]<Plug>(ripple_send_line), |yrr|
+    Send the current line to the REPL. This is equivalent to >
+        ["x]<Plug>(ripple_send_motion)_
+
 <Plug>(ripple_send_buffer), |yr<cr>|
     Send the whole buffer to the REPL.
-
-<Plug>(ripple_send_line), |yrr|
-    Send the current line to the REPL. This is equivalent to >
-        <Plug>(ripple_send_motion)_
 
 ==============================================================================
 CONFIGURATION                                                   *ripple-config*
