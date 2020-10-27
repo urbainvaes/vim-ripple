@@ -45,19 +45,24 @@ enabled only if |g:ripple_enable_mappings| is set to `1`.
     Open the REPL window (Normal mode mapping).
     Mnemonic: "you enter (the REPL)"
 
-<Plug>(ripple_send_motion), |yr|
-    Send text object to the REPL window (Normal mode mapping).
+["x]<Plug>(ripple_send_motion), |yr|
+    Send text object to the REPL window (Normal mode mapping), and save the
+    code selection under label `x` for future reuse with `"x<Plug>(ripple_send_previous)`. 
+    The register `x` must be a number between 0 and 9, and it defaults to 0 if
+    no register is passed.
     Mnemonic: "you run".
 
-<Plug>(ripple_send_selection), |R|
-    Send text object to the REPL window (Visual mode mapping).
+["x]<Plug>(ripple_send_selection), |R|
+    Send text object to the REPL window (Visual mode mapping), and save the
+    code selection under label `x`.
     Mnemonic: "run".
 
-<Plug>(ripple_send_previous), |yp|
-    Resend the latest selection sent to the REPL. More precisely, send the
-    code that is currently at the location of the latest code chunk sent to
-    the REPL. If the contents of the buffer changed in the meantime, this code
-    might be different from the latest code chunk.
+["x]<Plug>(ripple_send_previous), |yp|
+    Send the latest code selection saved under label `x` to the REPL. More
+    precisely, send the code that is currently at the location of the latest
+    code chunk under label `x` sent to the REPL. If the contents of the buffer
+    changed in the meantime, this code might be different from the latest code
+    chunk.
 
 <Plug>(ripple_send_buffer), |yr<cr>|
     Send the whole buffer to the REPL.
@@ -76,7 +81,7 @@ Global configuration~
     |b:ripple_repl| below.
 
     Internally, a REPL configuration for a given filetype is a combination of
-    four variables:
+    five variables:
           - A {command} to start the REPL;
           - A pair of strings {string1} and {string2} to prepend and append to
             code sent to the REPL, respectively. This is sometimes necessary
@@ -86,14 +91,18 @@ Global configuration~
             line. (This can be useful to avoid the need to press <cr> manually
             in the terminal window. In ipython, for example, two <cr> are
             required to run an indented block.)
+          - An optional function {filter} to further filter the code before
+            sending it to the REPL.
 
     In the dictionary |g:ripple_repl|, the keys are |filetype|s and the values
     are either of the following:
         - A string containing the {command} to start the REPL (e.g. 'bash',
           'guile'). In this case the other parameters are assumed to be as
           follows: {string1} = "",  {string2} = "" and {extra_cr} = 0.
-        - A list of with four entries:
+        - A list with four entries:
               [{command}, {string1}, {string2}, {extra_cr}]
+        - A list with five entries:
+              [{command}, {string1}, {string2}, {extra_cr}, {filter}]
 
     Default: >
        {  "python": ["ipython", "\<c-u>\<esc>[200~", "\<esc>[201~", 1],
