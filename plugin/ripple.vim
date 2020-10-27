@@ -41,6 +41,10 @@ if get(g:, 'ripple_enable_mappings', s:default_enable_mappings)
     nmap yrr <Plug>(ripple_send_line)
     nmap yp <Plug>(ripple_send_previous)
     xmap R <Plug>(ripple_send_selection)
+
+    nmap 1yr "1yr
+    nmap 1yrr "1yrr
+    nmap 1yp "1yp
 endif
 
 command! -range -nargs=* Ripple call ripple#command(<line1>, <line2>, <q-args>)

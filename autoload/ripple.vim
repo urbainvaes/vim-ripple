@@ -293,21 +293,22 @@ function! ripple#command(l1, l2, text)
 endfunction
 
 function! ripple#send_previous()
+    let index = v:register =~ "[0-9]" ? v:register : 0
     if !has_key(s:term_buffer_nr, &ft)
         echom "No term buffer opened for filetype '".&ft."'…"
         return -1
     elseif !has_key(s:source, &ft)
         echom "No previous selection for filetype '".&ft."'…"
         return -1
-    elseif !has_key(s:source[&ft], v:count)
+    elseif !has_key(s:source[&ft], index)
         echom "Register is empty…"
         return -1
-    elseif !buflisted(s:source[&ft][v:count]['bufnr'])
+    elseif !buflisted(s:source[&ft][index]['bufnr'])
         echom "Buffer no longer exists…"
         return -1
     endif
     let s:ft = &ft
-    let s:index = v:count
+    let s:index = index
     call s:send_code()
     call s:highlight()
     let s:index = 0
@@ -315,7 +316,7 @@ endfunction
 
 function! ripple#send_buffer()
     let s:ft = &ft
-    let s:index = v:count
+    let s:index = v:register =~ "[0-9]" ? v:register : 0
     let source = s:new_source(s:ft, s:index)
     let source["mode"] = "line"
     let [source['line_start'], source['line_end']] = [1, line('$')]
@@ -327,7 +328,7 @@ endfunction
 
 function! ripple#send_visual()
     let s:ft = &ft
-    let s:index = v:count
+    let s:index = v:register =~ "[0-9]" ? v:register : 0
     let source = s:new_source(s:ft, s:index)
     let source['mode'] = visualmode()
     call s:extract_source()
@@ -342,7 +343,7 @@ endfunction
 
 function! ripple#accept_motion(...)
     let s:ft = &ft
-    let s:index = v:register
+    let s:index = v:register =~ "[0-9]" ? v:register : 0
     let source = s:new_source(s:ft, s:index)
     let source['mode'] = a:1
     call s:extract_source()
