@@ -342,7 +342,7 @@ endfunction
 
 function! ripple#accept_motion(...)
     let s:ft = &ft
-    let s:index = v:count
+    let s:index = v:register
     let source = s:new_source(s:ft, s:index)
     let source['mode'] = a:1
     call s:extract_source()
