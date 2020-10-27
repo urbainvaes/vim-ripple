@@ -45,6 +45,7 @@ let s:source = {}
 let s:term_buffer_nr = {}
 let s:repl_params = {}
 let s:ft = -1
+let s:index = 0
 
 function! ripple#status()
     if !has_key(s:term_buffer_nr, &ft)
@@ -206,19 +207,19 @@ function! s:send_code(...)
 endfunction
 
 function! s:is_charwise()
-    let mode = s:source[s:ft]['mode']
+    let mode = s:source[s:ft][s:index]['mode']
     return (mode ==# "char" || mode ==# "v")
 endfunction
 
 function! s:is_end_paragraph()
-    let source = s:source[s:ft]
+    let source = s:source[s:ft][s:index]
     return source['mode'] == "line"
                 \ && getline(source['line_end']) != ""
                 \ && getline(source['line_end'] + 1) == ""
 endfunction
 
 function! s:extract_code()
-    let source = s:source[s:ft]
+    let source = s:source[s:ft][s:index]
     let lines = getbufline(source['bufnr'], source['line_start'], source['line_end'])
     if s:is_charwise() && len(lines) > -1
         let lines[-1] = lines[-1][:source['column_end'] - 1]
@@ -237,7 +238,7 @@ function! s:extract_code()
 endfunction
 
 function! s:highlight()
-    let source = s:source[s:ft]
+    let source = s:source[s:ft][s:index]
     if bufnr("%") != source['bufnr']
         return
     endif
@@ -251,10 +252,19 @@ function! s:highlight()
     endif
 endfunction
 
+function! s:new_source(ft)
+    if !has_key(s:source, a:ft)
+        let s:source[a:ft] = []
+    elseif len(s:source[a:ft]) == 10
+        call remove(s:source[a:ft], -1)
+    endif
+    call insert(s:source[a:ft], {}, 0)
+    return s:source[a:ft][0]
+endfunction
+
 function! s:send_lines(l1, l2)
     let s:ft = &ft
-    let s:source[s:ft] = {}
-    let source = s:source[s:ft]
+    let source = s:new_source(s:ft)
     let source['mode'] = "line"
     let [source['line_start'], source['line_end']] = [a:l1, a:l2]
     let [source['column_start'], source['column_end']] = [-1, -1]
@@ -264,7 +274,7 @@ function! s:send_lines(l1, l2)
 endfunction
 
 function! s:extract_source()
-    let source = s:source[s:ft]
+    let source = s:source[s:ft][s:index]
     let is_visual = (source['mode'] ==# "v" || source['mode'] ==# "V")
     let m1 = is_visual ? "'<" : "'["
     let m2 = is_visual ? "'>" : "']"
@@ -291,19 +301,23 @@ function! ripple#send_previous()
     elseif !has_key(s:source, &ft)
         echom "No previous selection for filetype '".&ft."'…"
         return -1
-    elseif !buflisted(s:source[&ft]['bufnr'])
+    elseif v:count1 - 1 >= len(s:source[&ft])
+        echom "Count too high…"
+        return -1
+    elseif !buflisted(s:source[&ft][s:index]['bufnr'])
         echom "Buffer no longer exists…"
         return -1
     endif
     let s:ft = &ft
+    let s:index = v:count1 - 1
     call s:send_code()
     call s:highlight()
+    let s:index = 0
 endfunction
 
 function! ripple#send_buffer()
     let s:ft = &ft
-    let s:source[s:ft] = {}
-    let source = s:source[s:ft]
+    let source = s:new_source(s:ft)
     let source["mode"] = "line"
     let [source['line_start'], source['line_end']] = [1, line('$')]
     let [source['column_start'], source['column_end']] = [-1, -1]
@@ -314,8 +328,8 @@ endfunction
 
 function! ripple#send_visual()
     let s:ft = &ft
-    let s:source[s:ft] = {}
-    let s:source[s:ft]['mode'] = visualmode()
+    let source = s:new_source(s:ft)
+    let source['mode'] = visualmode()
     call s:extract_source()
     call s:send_code()
     call s:highlight()
@@ -328,8 +342,8 @@ endfunction
 
 function! ripple#accept_motion(...)
     let s:ft = &ft
-    let s:source[s:ft] = {}
-    let s:source[s:ft]['mode'] = a:1
+    let source = s:new_source(s:ft)
+    let source['mode'] = visualmode()
     call s:extract_source()
     call s:send_code()
     call s:highlight()
