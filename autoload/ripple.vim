@@ -24,7 +24,7 @@ let s:default_autoinsert = 1
 let s:default_highlight = "DiffAdd"
 let s:default_winpos = "vertical"
 let s:default_delay = "500m"
-let s:default_one_term_per = "ft"
+let s:default_one_term_per = "buf"
 
 function! s:remove_comments(code)
     return substitute(a:code, "^#[^\r]*\r\\|\r#[^\r]*", "", "g")
@@ -50,11 +50,19 @@ let s:repl_params = {}
 let s:source = ""
 
 function! ripple#status()
-    if !has_key(s:term_buffer_nr, &ft)
+    let config = get(g:, 'ripple_one_term_per', s:default_one_term_per)
+    if config =~ "^f" && !has_key(s:term_buffer_nr, &ft)
         echom "No term buffer opened for filetype '".&ft."'…"
+    elseif config =~ "^b" && !has_key(s:term_buffer_nr, bufnr())
+        echom "No term buffer opened for buffer '".bufnr()."'…"
     else
-        echom "Term buffer:" s:term_buffer_nr[&ft]."."
+        echom "Term buffer:" s:term_buffer_nr[s:get_key()]."."
     endif
+endfunction
+
+function! s:get_key()
+    let config = get(g:, 'ripple_one_term_per', s:default_one_term_per)
+    return config =~ "^f" ? &ft : bufnr()
 endfunction
 
 function! s:set_repl_params()
@@ -79,8 +87,8 @@ function! s:set_repl_params()
 endfunction
 
 function! ripple#open_repl()
-    let ft = &ft
-    if has_key(s:term_buffer_nr, ft) && buffer_exists(s:term_buffer_nr[ft])
+    let [ft, key] = [&ft, s:get_key()]
+    if has_key(s:term_buffer_nr, key) && buffer_exists(s:term_buffer_nr[key])
         return
     endif
     let winid = win_getid()
@@ -151,7 +159,7 @@ function! ripple#open_repl()
             silent execute term_command s:repl_params[ft][0]
         endif
     endif
-    let s:term_buffer_nr[ft] = bufnr('%')
+    let s:term_buffer_nr[key] = bufnr('%')
 
     if has("nvim")
         " Move cursor to last line to follow output
@@ -166,15 +174,16 @@ function! ripple#open_repl()
     return 0
 endfunction
 
-function! s:send_to_buffer(formatted, ft)
-    if !has_key(s:term_buffer_nr, &ft)
-        echom "No term buffer opened for filetype '".a:ft."'…"
+function! s:send_to_buffer(formatted)
+    let key = s:get_key()
+    if !has_key(s:term_buffer_nr, key)
+        echom "No term buffer opened for key '".key."'…"
         return —1
     endif
     let tabnr = tabpagenr()
     tab split
     " Silent for vim
-    silent execute "noautocmd buffer" s:term_buffer_nr[a:ft]
+    silent execute "noautocmd buffer" s:term_buffer_nr[key]
     norm G$
     if has("nvim")
         put =a:formatted
@@ -206,7 +215,7 @@ function! s:send_code(...)
     endif
     let bracketed_paste = [s:repl_params[ft][1], s:repl_params[ft][2]]
     let formatted_code = bracketed_paste[0].code.bracketed_paste[1].newline
-    call s:send_to_buffer(formatted_code, ft)
+    call s:send_to_buffer(formatted_code)
 endfunction
 
 function! s:is_charwise()
@@ -253,8 +262,7 @@ function! s:highlight()
 endfunction
 
 function! s:new_source(index)
-    let config = get(g:, 'ripple_one_term_per', s:default_one_term_per)
-    let key = config == "ft" ? &ft : bufnr()
+    let key = s:get_key()
     if !has_key(s:sources, key)
         let s:sources[key] = {}
     endif
@@ -296,14 +304,17 @@ endfunction
 function! ripple#send_previous()
     let index = v:register =~ "[0-9]" ? v:register : 0
     let config = get(g:, 'ripple_one_term_per', s:default_one_term_per)
-    if !has_key(s:term_buffer_nr, &ft)
+    if config =~ "^f" && !has_key(s:term_buffer_nr, &ft)
         echom "No term buffer opened for filetype '".&ft."'…"
         return -1
-    elseif config == "ft" && !has_key(s:sources, &ft)
+    elseif config =~ "^f" && !has_key(s:sources, &ft)
         echom "No previous selection for filetype '".&ft."'…"
         return -1
-    elseif config == "buf" && !has_key(s:sources, bufnr())
-        echom "No previous selection for buffer '".bufnor()."'…"
+    elseif config =~ "^b" && !has_key(s:term_buffer_nr, bufnr())
+        echom "No term buffer opened for buffer '".bufnr()."'…"
+        return -1
+    elseif config =~ "^b" && !has_key(s:sources, bufnr())
+        echom "No previous selection for buffer '".bufnr()."'…"
         return -1
     endif
     let key = config == "ft" ? &ft : bufnr()
