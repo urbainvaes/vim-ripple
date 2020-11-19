@@ -49,8 +49,8 @@ enabled only if |g:ripple_enable_mappings| is set to `1`.
 ["x]<Plug>(ripple_send_motion), |yr|
     Send text object to the REPL window (Normal mode mapping), and save the
     code selection under label `x` for future reuse with `"x<Plug>(ripple_send_previous)`.
-    The register `x` must be a number between 0 and 9, and it defaults to 0 if
-    no register is passed.
+    We remark that the register mechanism is employed only to pass information
+    to the plugin; the vim registers themselves are left untouched.
     Mnemonic: "you run".
 
 ["x]<Plug>(ripple_send_selection), |R|

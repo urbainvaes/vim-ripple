@@ -113,10 +113,10 @@ function! ripple#open_repl()
             let term_name = g:ripple_term_name_root."_".&ft
         elseif has_key(g:, 'ripple_term_name')
             let term_name = g:ripple_term_name
-            if bufexists(term_name)
+            while bufexists(term_name)
                 echom "Buffer '".term_name."' already exists, appending _".&ft."…"
                 let term_name = term_name."_".&ft
-            endif
+            endwhile
         endif
 
         silent execute winpos." new"
@@ -302,7 +302,7 @@ function! ripple#command(l1, l2, text)
 endfunction
 
 function! ripple#send_previous()
-    let index = v:register =~ "[0-9]" ? v:register : 0
+    let index = v:register
     let config = get(g:, 'ripple_one_term_per', s:default_one_term_per)
     if config =~ "^f" && !has_key(s:term_buffer_nr, &ft)
         echom "No term buffer opened for filetype '".&ft."'…"
@@ -331,7 +331,7 @@ function! ripple#send_previous()
 endfunction
 
 function! ripple#send_buffer()
-    let index = v:register =~ "[0-9]" ? v:register : 0
+    let index = v:register
     let s:source = s:new_source(index)
     let s:source["mode"] = "line"
     let s:source["ft"] = &ft
@@ -343,7 +343,7 @@ function! ripple#send_buffer()
 endfunction
 
 function! ripple#send_visual()
-    let index = v:register =~ "[0-9]" ? v:register : 0
+    let index = v:register
     let s:source = s:new_source(index)
     let s:source['mode'] = visualmode()
     let s:source['ft'] = &ft
@@ -358,7 +358,7 @@ function! ripple#save()
 endfunction
 
 function! ripple#accept_motion(...)
-    let index = v:register =~ "[0-9]" ? v:register : 0
+    let index = v:register
     let s:source = s:new_source(index)
     let s:source['mode'] = a:1
     let s:source['ft'] = &ft

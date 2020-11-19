@@ -42,6 +42,9 @@ if get(g:, 'ripple_enable_mappings', s:default_enable_mappings)
     nmap yp <Plug>(ripple_send_previous)
     xmap R <Plug>(ripple_send_selection)
 
+    nmap 0yr "0yr
+    nmap 0yrr "0yrr
+    nmap 0yp "0yp
     nmap 1yr "1yr
     nmap 1yrr "1yrr
     nmap 1yp "1yp
