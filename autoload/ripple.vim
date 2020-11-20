@@ -359,7 +359,7 @@ function! ripple#command(l1, l2, text)
 endfunction
 
 function! ripple#send_previous()
-    let index = v:register =~ "[0-9]" ? v:register : 0
+    let index = v:register
     let key = s:is_isolated() ? bufnr() : &ft
 
     if !has_key(s:sources, key)
@@ -381,7 +381,7 @@ function! ripple#send_previous()
 endfunction
 
 function! ripple#send_buffer()
-    let index = v:register =~ "[0-9]" ? v:register : 0
+    let index = v:register
     let s:source = s:new_source(index)
     let s:source["mode"] = "line"
     let s:source["ft"] = &ft
@@ -393,7 +393,7 @@ function! ripple#send_buffer()
 endfunction
 
 function! ripple#send_visual()
-    let index = v:register =~ "[0-9]" ? v:register : 0
+    let index = v:register
     let s:source = s:new_source(index)
     let s:source['mode'] = visualmode()
     let s:source['ft'] = &ft
@@ -408,7 +408,7 @@ function! ripple#save()
 endfunction
 
 function! ripple#accept_motion(...)
-    let index = v:register =~ "[0-9]" ? v:register : 0
+    let index = v:register
     let s:source = s:new_source(index)
     let s:source['mode'] = a:1
     let s:source['ft'] = &ft

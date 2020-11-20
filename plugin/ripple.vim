@@ -45,6 +45,9 @@ if get(g:, 'ripple_enable_mappings', s:default_enable_mappings)
     nmap 1yr "1yr
     nmap 1yrr "1yrr
     nmap 1yp "1yp
+    nmap 0yr "0yr
+    nmap 0yrr "0yrr
+    nmap 0yp "0yp
 endif
 
 command! -range -nargs=* Ripple call ripple#command(<line1>, <line2>, <q-args>)

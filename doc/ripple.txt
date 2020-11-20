@@ -49,8 +49,8 @@ enabled only if |g:ripple_enable_mappings| is set to `1`.
 ["x]<Plug>(ripple_send_motion), |yr|
     Send text object to the REPL window (Normal mode mapping), and save the
     code selection under label `x` for future reuse with `"x<Plug>(ripple_send_previous)`.
-    The register `x` must be a number between 0 and 9, and it defaults to 0 if
-    no register is passed.
+    We remark that the register mechanism is used only to pass information to
+    the plugin; the content of vim registers is left untouched.
     Mnemonic: "you run".
 
 ["x]<Plug>(ripple_send_selection), |R|
@@ -157,8 +157,8 @@ Nov 2020~
 Oct 2020~
     Enable saving several selections for later use with `"<number>yp`.
     A line initially run with `"3yrr` can be run again with `"3yp`. The register
-    mechanism is used only to pass a number; the vim registers themselves are
-    left untouched by the plugin.
+    mechanism is used only to pass information; the vim registers themselves
+    are left untouched by the plugin.
 
 ==============================================================================
  vim:tw=78:ts=4:et:ft=help:norl:
