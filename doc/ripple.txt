@@ -149,9 +149,10 @@ Buffer-local configuration~
 CHANGELOG                                                    *ripple-changelog*
 
 Nov 2020~
-    Add new configuration variable `g:ripple_one_term_per`, which can take the
-    values `"filetype"` (default) or `"buffer"`. With the default value, all
-    buffers of the same filetype will share the same term buffer.
+    REPLs are now either isolated or not. When they are not isolated, the same
+    terminal is shared by all buffers of a filetype. To start an isolated
+    REPL, use `y<cr>`. To start or attach to a REPL common to all buffers of
+    the filetype, simply run a command of the type `yr<motion>`.
 
 Oct 2020~
     Enable saving several selections for later use with `"<number>yp`.

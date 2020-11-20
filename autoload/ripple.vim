@@ -24,7 +24,7 @@ let s:default_autoinsert = 1
 let s:default_highlight = "DiffAdd"
 let s:default_winpos = "vertical"
 let s:default_delay = "500m"
-let s:default_one_term_per = "buf"
+let s:default_term_name = "term: ripple"
 
 function! s:remove_comments(code)
     return substitute(a:code, "^#[^\r]*\r\\|\r#[^\r]*", "", "g")
@@ -43,8 +43,9 @@ let s:default_repls = {
 
 " Memory for the state of the plugin
 let s:sources = {}
-let s:term_buffer_nr = {}
 let s:repl_params = {}
+let s:buf_to_term = {}
+let s:ft_to_term = {}
 
 " Last used source
 let s:source = ""
@@ -58,11 +59,6 @@ function! ripple#status()
     else
         echom "Term buffer:" s:term_buffer_nr[s:get_key()]."."
     endif
-endfunction
-
-function! s:get_key()
-    let config = get(g:, 'ripple_one_term_per', s:default_one_term_per)
-    return config =~ "^f" ? &ft : bufnr()
 endfunction
 
 function! s:set_repl_params()
@@ -86,13 +82,61 @@ function! s:set_repl_params()
     return 0
 endfunction
 
-function! ripple#open_repl()
-    let [ft, key] = [&ft, s:get_key()]
-    if has_key(s:term_buffer_nr, key) && buffer_exists(s:term_buffer_nr[key])
-        return
-    endif
-    let winid = win_getid()
+function! s:is_isolated()
+    let [bufn, ft] = [bufnr(), &ft]
 
+    " If term opened
+    if has_key(s:buf_to_term, bufn)
+        if !has_key(s:ft_to_term, ft)
+            return 1
+        elseif s:ft_to_term[ft] != s:buf_to_term[bufn]
+            return 1
+        else
+            return 0
+        endif
+    endif
+
+    " If term not opened
+    if has_key(b:, 'ripple_term_name') || has_key(b:, 'ripple_repl')
+        return 1
+    else
+        return 0
+    endif
+endfunction
+
+function! s:assign_repl()
+    if has_key(b:, 'ripple_term_name') || has_key(b:, 'ripple_repl')
+        return ripple#open_repl(1)
+    endif
+
+    let [bufn, ft] = [bufnr(), &ft]
+    if has_key(s:ft_to_term, ft) && bufexists(s:ft_to_term[ft])
+        let s:buf_to_term[bufn] = s:ft_to_term[ft]
+        return 0
+    endif
+
+    return ripple#open_repl(0)
+endfunction
+
+function! ripple#open_repl(isolated)
+    let [bufn, ft] = [bufnr(), &ft]
+
+    if a:isolated
+        echohl Type
+        echon "vim-ripple: "
+        echohl None
+        echon "Opening an isolated REPL. To open a REPL common to all buffers of filetype '"
+        echohl Identifier
+        echon ft
+        echohl None
+        echon "', use '"
+        echohl Identifier
+        echon "yr<motion>"
+        echohl None
+        echon "' directly.\<cr>"
+    endif
+
+    let winid = win_getid()
     if s:set_repl_params() == -1
         return -1
     endif
@@ -101,7 +145,7 @@ function! ripple#open_repl()
     if has_key(g:, 'ripple_window')
         let legacy = 'g:ripple_window'
     elseif has_key(g:, 'ripple_term_command')
-        let legacy = 'ripple_term_command'
+        let legacy = 'g:ripple_term_command'
     endif
     if legacy == 'no'
         let winpos = get(g:, 'ripple_winpos', s:default_winpos)
@@ -109,14 +153,18 @@ function! ripple#open_repl()
         let term_name = ""
         if has_key(b:, 'ripple_term_name')
             let term_name = b:ripple_term_name
-        elseif has_key(g:, 'ripple_term_name_root')
-            let term_name = g:ripple_term_name_root."_".&ft
-        elseif has_key(g:, 'ripple_term_name')
-            let term_name = g:ripple_term_name
-            if bufexists(term_name)
-                echom "Buffer '".term_name."' already exists, appending _".&ft."…"
-                let term_name = term_name."_".&ft
+        else
+            let term_name = get(g:, 'ripple_term_name', s:default_term_name)
+            if a:isolated
+                let term_name = term_name."_".ft."_b".bufn
+            else
+                let term_name = term_name."_".ft."_common"
             endif
+        endif
+
+        if bufexists(term_name)
+            echom "Buffer '".term_name."' already exists…"
+            return -1
         endif
 
         silent execute winpos." new"
@@ -159,7 +207,6 @@ function! ripple#open_repl()
             silent execute term_command s:repl_params[ft][0]
         endif
     endif
-    let s:term_buffer_nr[key] = bufnr('%')
 
     if has("nvim")
         " Move cursor to last line to follow output
@@ -169,21 +216,27 @@ function! ripple#open_repl()
         endif
     endif
 
+    let term_buf = bufnr('%')
     call win_gotoid(winid)
     execute "sleep" s:default_delay
+
+    let s:buf_to_term[bufn] = term_buf
+    if !a:isolated
+       let s:ft_to_term[ft] = term_buf
+    endif
     return 0
 endfunction
 
 function! s:send_to_buffer(formatted)
-    let key = s:get_key()
-    if !has_key(s:term_buffer_nr, key)
-        echom "No term buffer opened for key '".key."'…"
-        return —1
+    let bufn = bufnr()
+    if !has_key(s:buf_to_term, bufn)
+        echom "No term buffer opened for buffer '".bufn."'…"
+        return -1
     endif
     let tabnr = tabpagenr()
     tab split
     " Silent for vim
-    silent execute "noautocmd buffer" s:term_buffer_nr[key]
+    silent execute "noautocmd buffer" s:buf_to_term[bufn]
     norm G$
     if has("nvim")
         put =a:formatted
@@ -197,9 +250,13 @@ endfunction
 
 function! s:send_code(...)
     " We need this here because this sets repl_params
-    if ripple#open_repl() == -1
-        return
+    let bufn = bufnr()
+    if !has_key(s:buf_to_term, bufn) || !buffer_exists(s:buf_to_term[bufn])
+        if s:assign_repl() == -1
+            return
+        endif
     endif
+
     if a:0 == 0
         " Add <cr> (useful e.g. so that python functions get run)
         let ft = s:source['ft']
@@ -262,7 +319,7 @@ function! s:highlight()
 endfunction
 
 function! s:new_source(index)
-    let key = s:get_key()
+    let key = s:is_isolated() ? bufnr() : &ft
     if !has_key(s:sources, key)
         let s:sources[key] = {}
     endif
@@ -303,28 +360,21 @@ endfunction
 
 function! ripple#send_previous()
     let index = v:register =~ "[0-9]" ? v:register : 0
-    let config = get(g:, 'ripple_one_term_per', s:default_one_term_per)
-    if config =~ "^f" && !has_key(s:term_buffer_nr, &ft)
-        echom "No term buffer opened for filetype '".&ft."'…"
-        return -1
-    elseif config =~ "^f" && !has_key(s:sources, &ft)
-        echom "No previous selection for filetype '".&ft."'…"
-        return -1
-    elseif config =~ "^b" && !has_key(s:term_buffer_nr, bufnr())
-        echom "No term buffer opened for buffer '".bufnr()."'…"
-        return -1
-    elseif config =~ "^b" && !has_key(s:sources, bufnr())
-        echom "No previous selection for buffer '".bufnr()."'…"
+    let key = s:is_isolated() ? bufnr() : &ft
+
+    if !has_key(s:sources, key)
+        echom "No previous selection…"
         return -1
     endif
-    let key = config == "ft" ? &ft : bufnr()
     if !has_key(s:sources[key], index)
         echom "Register is empty…"
         return -1
-    elseif !buflisted(s:sources[key][index]['bufnr'])
+    endif
+    if !buflisted(s:sources[key][index]['bufnr'])
         echom "Buffer no longer exists…"
         return -1
     endif
+
     let s:source = s:sources[key][index]
     call s:send_code()
     call s:highlight()
