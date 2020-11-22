@@ -149,15 +149,16 @@ Buffer-local configuration~
 CHANGELOG                                                    *ripple-changelog*
 
 Nov 2020~
-    Add new configuration variable `g:ripple_one_term_per`, which can take the
-    values `"filetype"` (default) or `"buffer"`. With the default value, all
-    buffers of the same filetype will share the same term buffer.
+    REPLs are now either isolated or not. When they are not isolated, the same
+    terminal is shared by all buffers of a filetype. To start an isolated
+    REPL, use `y<cr>`. To start or attach to a REPL common to all buffers of
+    the filetype, simply run a command of the type `yr<motion>`.
 
 Oct 2020~
     Enable saving several selections for later use with `"<number>yp`.
     A line initially run with `"3yrr` can be run again with `"3yp`. The register
-    mechanism is used only to pass a number; the vim registers themselves are
-    left untouched by the plugin.
+    mechanism is used only to pass information; the vim registers themselves
+    are left untouched by the plugin.
 
 ==============================================================================
  vim:tw=78:ts=4:et:ft=help:norl:
