@@ -50,14 +50,22 @@ let s:ft_to_term = {}
 " Last used source
 let s:source = ""
 
+function! s:echo(string)
+    echohl Type
+    echon "vim-ripple: "
+    echohl None
+    echon a:string
+    echon "\<cr>"
+endfunction
+
 function! ripple#status()
-    let config = get(g:, 'ripple_one_term_per', s:default_one_term_per)
-    if config =~ "^f" && !has_key(s:term_buffer_nr, &ft)
-        echom "No term buffer opened for filetype '".&ft."'…"
-    elseif config =~ "^b" && !has_key(s:term_buffer_nr, bufnr())
-        echom "No term buffer opened for buffer '".bufnr()."'…"
+    let [bufn, ft] = [bufnr('%'), &ft]
+    if !has_key(s:buf_to_term, bufn)
+        call s:echo("buffer is not paired to any terminal yet…")
+    elseif s:is_isolated()
+        call s:echo("Buffer is paired with isolated REPL in buffer number ".s:buf_to_term[bufn].".")
     else
-        echom "Term buffer:" s:term_buffer_nr[s:get_key()]."."
+        call s:echo("Buffer is paired with shared ".ft." REPL in buffer number ".s:buf_to_term[bufn].".")
     endif
 endfunction
 
@@ -83,7 +91,7 @@ function! s:set_repl_params()
 endfunction
 
 function! s:is_isolated()
-    let [bufn, ft] = [bufnr(), &ft]
+    let [bufn, ft] = [bufnr('%'), &ft]
 
     " If term opened
     if has_key(s:buf_to_term, bufn)
@@ -109,7 +117,7 @@ function! s:assign_repl()
         return ripple#open_repl(1)
     endif
 
-    let [bufn, ft] = [bufnr(), &ft]
+    let [bufn, ft] = [bufnr('%'), &ft]
     if has_key(s:ft_to_term, ft) && bufexists(s:ft_to_term[ft])
         let s:buf_to_term[bufn] = s:ft_to_term[ft]
         return 0
@@ -119,7 +127,7 @@ function! s:assign_repl()
 endfunction
 
 function! ripple#open_repl(isolated)
-    let [bufn, ft] = [bufnr(), &ft]
+    let [bufn, ft] = [bufnr('%'), &ft]
 
     if a:isolated
         echohl Type
@@ -228,7 +236,7 @@ function! ripple#open_repl(isolated)
 endfunction
 
 function! s:send_to_buffer(formatted)
-    let bufn = bufnr()
+    let bufn = bufnr('%')
     if !has_key(s:buf_to_term, bufn)
         echom "No term buffer opened for buffer '".bufn."'…"
         return -1
@@ -250,7 +258,7 @@ endfunction
 
 function! s:send_code(...)
     " We need this here because this sets repl_params
-    let bufn = bufnr()
+    let bufn = bufnr('%')
     if !has_key(s:buf_to_term, bufn) || !buffer_exists(s:buf_to_term[bufn])
         if s:assign_repl() == -1
             return
@@ -319,7 +327,7 @@ function! s:highlight()
 endfunction
 
 function! s:new_source(index)
-    let key = s:is_isolated() ? bufnr() : &ft
+    let key = s:is_isolated() ? bufnr('%') : &ft
     if !has_key(s:sources, key)
         let s:sources[key] = {}
     endif
@@ -360,7 +368,7 @@ endfunction
 
 function! ripple#send_previous()
     let index = v:register
-    let key = s:is_isolated() ? bufnr() : &ft
+    let key = s:is_isolated() ? bufnr('%') : &ft
 
     if !has_key(s:sources, key)
         echom "No previous selection…"
