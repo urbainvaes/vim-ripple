@@ -27,7 +27,7 @@ let g:loaded_ripple = 1
 
 let s:default_enable_mappings = 1
 
-nnoremap <silent> <Plug>(ripple_open_repl) :call ripple#open_repl()<cr>
+nnoremap <silent> <Plug>(ripple_open_repl) :call ripple#open_repl(1)<cr>
 nnoremap <silent> <expr> <Plug>(ripple_send_motion) ripple#send_motion()
 nnoremap <silent> <Plug>(ripple_send_previous) :<c-u>call ripple#send_previous()<cr>
 nnoremap <silent> <Plug>(ripple_send_buffer) :<c-u>call ripple#send_buffer()<cr>

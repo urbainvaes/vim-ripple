@@ -42,14 +42,27 @@ The <Plug> mappings are always defined, but the mappings to physical keys are
 enabled only if |g:ripple_enable_mappings| is set to `1`.
 
 <Plug>(ripple_open_repl), |y<cr>|
-    Open the REPL window (Normal mode mapping).
+    Open a new isolated REPL window (Normal mode mapping).
     Mnemonic: "you enter (the REPL)"
 
 ["x]<Plug>(ripple_send_motion), |yr|
-    Send text object to the REPL window (Normal mode mapping), and save the
-    code selection under label `x` for future reuse with `"x<Plug>(ripple_send_previous)`. 
-    The register `x` must be a number between 0 and 9, and it defaults to 0 if
-    no register is passed.
+    Send text object to the REPL window linked to the current buffer.
+
+    If the current buffer hasn't been assigned a REPL yet, then it will be
+    automatically linked to a filetype REPL, i.e. a REPL to which all buffers
+    of the same filetype are assigned unless otherwise specified.
+    If this filetype REPL does not exist yet, then it will be opened
+    automatically by the plugin.
+
+    If instead of using the filetype REPL, you wish to open a REPL
+    specifically for the current buffer, run `y<cr>` to open an isolated REPL
+    link the current buffer to it.
+
+    When a register, say `x`, is passed to the mapping, the code selection is
+    saved under label `x` for future reuse with `"x<Plug>(ripple_send_previous)`.
+    The register mechanism is employed only to pass information to the plugin;
+    the vim registers themselves are left untouched.
+
     Mnemonic: "you run".
 
 ["x]<Plug>(ripple_send_selection), |R|
@@ -60,9 +73,9 @@ enabled only if |g:ripple_enable_mappings| is set to `1`.
 ["x]<Plug>(ripple_send_previous), |yp|
     Send the latest code selection saved under label `x` to the REPL. More
     precisely, send the code that is currently at the location of the latest
-    code chunk under label `x` sent to the REPL. If the contents of the buffer
+    code chunk sent to the REPL under label `x`. If the contents of the buffer
     changed in the meantime, this code might be different from the latest code
-    chunk.
+    chunk under label `x`.
 
 ["x]<Plug>(ripple_send_line), |yrr|
     Send the current line to the REPL. This is equivalent to >
@@ -145,4 +158,23 @@ Buffer-local configuration~
     the global option `g:ripple_term_name`.
 
 ==============================================================================
- vim:tw=78:ts=4:et:ft=help:norl:
+CHANGELOG                                                    *ripple-changelog*
+
+Nov 2020~
+    REPLs are now either isolated or not isolated. Isolated REPLs receive
+    input from only one buffer, whereas non-isolated REPLs can reveive input
+    from several buffers that have the same filetype.
+
+    The mapping `y<cr>` will now start an isolated REPL. To start or attach to
+    a REPL common to all buffers of the filetype, simply run a command of the
+    type `yr<motion>`.
+
+Oct 2020~
+    Enable saving several selections for later use with `"<number>yp`.
+    For example, a line initially run with `"3yrr` can be run again with
+    `"3yp`. The register mechanism is used only to pass information; the vim
+    registers themselves are left untouched by the plugin.
+
+==============================================================================
+
+vim:tw=78:ts=4:et:ft=help:norl:
