@@ -71,11 +71,22 @@ enabled only if |g:ripple_enable_mappings| is set to `1`.
     Mnemonic: "run".
 
 ["x]<Plug>(ripple_send_previous), |yp|
-    Send the latest code selection saved under label `x` to the REPL. More
-    precisely, send the code that is currently at the location of the latest
-    code chunk sent to the REPL under label `x`. If the contents of the buffer
-    changed in the meantime, this code might be different from the latest code
-    chunk under label `x`.
+    Send the latest code selection. More precisely, send the code that is
+    currently at the location of the latest code chunk sent to the REPL. If
+    the contents of the buffer changed in the meantime, this code might be
+    different from the latest code selection.
+
+    If a register `x` is used, `yp` will send the latest code selection saved
+    under label `x`. For example, if a code line was previously sent to
+    the REPL with `"ayrr`, this line can be run again with `"ayp`.
+
+    A count `<count>` may also be passed to `yp`. To understand what this
+    does, we remark that the code chunks sent to a REPL are stored
+    internally in a stack, with each new code selection added at the top. The
+    mapping `<count>yp` just sends to the REPL the element of the stack in
+    position `<count>`, where position indices start at 0. For example `1yp`
+    sends to the REPL not the latest code selection, but the one just before,
+    i.e. the second code selection on the stack.
 
 ["x]<Plug>(ripple_send_line), |yrr|
     Send the current line to the REPL. This is equivalent to >
@@ -159,6 +170,13 @@ Buffer-local configuration~
 
 ==============================================================================
 CHANGELOG                                                    *ripple-changelog*
+
+Dec 2020~
+    Previous selections associated with a given buffer are now stored in a
+    stack, and they can be run by passing a count to `yp`. For example, `1yp`
+    will send to the REPL the second element of the stack, and `2yp` will run
+    the third. Without a count, `yp` behaves as it used to: it sends to the
+    REPL the code chunk at the top of the stack, i.e. the one in position 0.
 
 Nov 2020~
     REPLs are now either isolated or not isolated. Isolated REPLs receive

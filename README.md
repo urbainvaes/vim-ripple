@@ -3,7 +3,7 @@
 This thin plugin makes it easy to send code to a REPL (read-evaluate-print loop) running within `vim` or `nvim`.
 Some advantages of this plugin over some of the alternatives (such as [iron.nvim](https://github.com/Vigemus/iron.nvim)) are the following:
 
-- This plugin is written and can be configured in `viml`.
+- This plugin is written and can be configured fully in `viml`.
 
 - The cursor does not move when a code chunk is sent to the REPL.
 
@@ -12,6 +12,10 @@ motions sent to the REPL are highlighted.
 
 - If not explicitly opened by `<Plug>(ripple_open_repl)`,
 the REPL opens automatically once a code chunk is sent.
+
+- The plugin is compatible with Tim Pope's [vim-repeat](https://github.com/tpope/vim-repeat).
+
+- Previous code selections are saved and can be reused easily (see `yp` in the documentation).
 
 ![](https://raw.github.com/urbainvaes/vim-ripple/demo/demo.gif)
 (Click to enlarge.)
@@ -48,9 +52,9 @@ and it controls whether an additional `<cr>` should be appended to the code chun
 In `ipython`, for example, two `<cr>` are required to run an indented block.)
 
 - A list with 5 entries, with the first four being as in the previous item and
-the last one being a function employed to format the code before sending it to the REPL. 
-For example, this is used in the default settings below to remove comments from `zsh` code chunks,
-which is useful because coments are not allowed in interactive shells by default 
+the last one being a function employed to format the code before sending it to the REPL.
+For example, this is used in the default settings below for removing comments from `zsh` code chunks,
+which is useful because coments are not allowed in interactive shells by default
 (this can be changed using `setopt interactivecomments`).
 
 The current default is the following:
@@ -77,18 +81,20 @@ The functions are exposed via `<Plug>` mappings.
 If `g:ripple_enable_mappings` is set to `1`,
 then additional mappings to keys are defined as follows:
 
-| `<Plug>` Mapping                    | Default key mapping | Description                |
-| -----------------------------       | ------------------- | -----------                |
-| `<Plug>(ripple_open_repl)`          | `y<cr>` (`nmap`)    | Open REPL                  |
-| `["x]<Plug>(ripple_send_motion)`    | [`"x`]`yr` (`nmap`)   | Send motion to REPL        |
-| `["x]<Plug>(ripple_send_previous)`  | [`"x`]`yp` (`nmap`)   | Resend previous code block |
-| `["x]<Plug>(ripple_send_selection)` | [`"x`]`R` (`xmap`)    | Send selection to REPL     |
-| `["x]<Plug>(ripple_send_line)`      | [`"x`]`yrr` (`nmap`)  | Send line to REPL          |
-| `<Plug>(ripple_send_buffer)`        | `yr<cr>` (`nmap`)   | Send whole buffer to REPL  |
+| `<Plug>` Mapping                    | Default key mapping | Description                    |
+| -----------------------------       | ------------------- | -----------                    |
+| `<Plug>(ripple_open_repl)`          | `y<cr>` (`nmap`)    | Open REPL                      |
+| `["x]<Plug>(ripple_send_motion)`    | `yr` (`nmap`)       | Send motion to REPL            |
+| `["x]<Plug>(ripple_send_previous)`  | `yp` (`nmap`)       | Resend previous code selection |
+| `["x]<Plug>(ripple_send_selection)` | `R` (`xmap`)        | Send selection to REPL         |
+| `["x]<Plug>(ripple_send_line)`      | `yrr` (`nmap`)      | Send line to REPL              |
+| `<Plug>(ripple_send_buffer)`        | `yr<cr>` (`nmap`)   | Send whole buffer to REPL      |
 
 If `<Plug>(ripple_send_motion)` is issued but no REPL is open,
 a REPL will open automatically.
 A mnemonic for `yr` is *you run*.
+Counts and registers can be passed to `yp` in order to refer to code selections other than the last;
+see the documentation for details.
 
 ## Additional customization
 

@@ -326,13 +326,19 @@ function! s:highlight()
     endif
 endfunction
 
-function! s:new_source(index)
+function! s:new_source(reg)
     let key = s:is_isolated() ? bufnr('%') : &ft
     if !has_key(s:sources, key)
         let s:sources[key] = {}
     endif
-    let s:sources[key][a:index] = {}
-    return s:sources[key][a:index]
+    if !has_key(s:sources[key], a:reg)
+        let s:sources[key][a:reg] = []
+    endif
+    if len(s:sources[key][a:reg]) > 9
+        call remove(s:sources[key][a:reg], -1)
+    end
+    call insert(s:sources[key][a:reg], {}, 0)
+    return s:sources[key][a:reg][0]
 endfunction
 
 function! s:send_lines(l1, l2)
@@ -367,30 +373,34 @@ function! ripple#command(l1, l2, text)
 endfunction
 
 function! ripple#send_previous()
-    let index = v:register
+    let [reg, count] = [v:register, v:count]
     let key = s:is_isolated() ? bufnr('%') : &ft
 
     if !has_key(s:sources, key)
         echom "No previous selection…"
         return -1
     endif
-    if !has_key(s:sources[key], index)
+    if !has_key(s:sources[key], reg)
         echom "Register is empty…"
         return -1
     endif
-    if !buflisted(s:sources[key][index]['bufnr'])
+    if len(s:sources[key][reg]) <= count
+        echom "There are only ".len(s:sources[key][reg])." in memory…"
+        return -1
+    endif
+    if !buflisted(s:sources[key][reg][count]['bufnr'])
         echom "Buffer no longer exists…"
         return -1
     endif
 
-    let s:source = s:sources[key][index]
+    let s:source = s:sources[key][reg][count]
     call s:send_code()
     call s:highlight()
 endfunction
 
 function! ripple#send_buffer()
-    let index = v:register
-    let s:source = s:new_source(index)
+    let reg = v:register
+    let s:source = s:new_source(reg)
     let s:source["mode"] = "line"
     let s:source["ft"] = &ft
     let [s:source['line_start'], s:source['line_end']] = [1, line('$')]
@@ -401,8 +411,8 @@ function! ripple#send_buffer()
 endfunction
 
 function! ripple#send_visual()
-    let index = v:register
-    let s:source = s:new_source(index)
+    let reg = v:register
+    let s:source = s:new_source(reg)
     let s:source['mode'] = visualmode()
     let s:source['ft'] = &ft
     call s:extract_source()
@@ -416,8 +426,8 @@ function! ripple#save()
 endfunction
 
 function! ripple#accept_motion(...)
-    let index = v:register
-    let s:source = s:new_source(index)
+    let reg = v:register
+    let s:source = s:new_source(reg)
     let s:source['mode'] = a:1
     let s:source['ft'] = &ft
     call s:extract_source()
