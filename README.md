@@ -84,10 +84,10 @@ then additional mappings to keys are defined as follows:
 | `<Plug>` Mapping                    | Default key mapping | Description                    |
 | -----------------------------       | ------------------- | -----------                    |
 | `<Plug>(ripple_open_repl)`          | `y<cr>` (`nmap`)    | Open REPL                      |
-| `["x]<Plug>(ripple_send_motion)`    | `yr` (`nmap`)       | Send motion to REPL            |
-| `["x]<Plug>(ripple_send_previous)`  | `yp` (`nmap`)       | Resend previous code selection |
-| `["x]<Plug>(ripple_send_selection)` | `R` (`xmap`)        | Send selection to REPL         |
-| `["x]<Plug>(ripple_send_line)`      | `yrr` (`nmap`)      | Send line to REPL              |
+| `<Plug>(ripple_send_motion)`    | `yr` (`nmap`)       | Send motion to REPL            |
+| `<Plug>(ripple_send_previous)`  | `yp` (`nmap`)       | Resend previous code selection |
+| `<Plug>(ripple_send_selection)` | `R` (`xmap`)        | Send selection to REPL         |
+| `<Plug>(ripple_send_line)`      | `yrr` (`nmap`)      | Send line to REPL              |
 | `<Plug>(ripple_send_buffer)`        | `yr<cr>` (`nmap`)   | Send whole buffer to REPL      |
 
 If `<Plug>(ripple_send_motion)` is issued but no REPL is open,
