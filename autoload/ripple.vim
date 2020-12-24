@@ -373,27 +373,27 @@ function! ripple#command(l1, l2, text)
 endfunction
 
 function! ripple#send_previous()
-    let [reg, count] = [v:register, v:count]
+    let [myreg, mycount] = [v:register, v:count]
     let key = s:is_isolated() ? bufnr('%') : &ft
 
     if !has_key(s:sources, key)
         echom "No previous selection…"
         return -1
     endif
-    if !has_key(s:sources[key], reg)
+    if !has_key(s:sources[key], myreg)
         echom "Register is empty…"
         return -1
     endif
-    if len(s:sources[key][reg]) <= count
-        echom "There are only ".len(s:sources[key][reg])." in memory…"
+    if len(s:sources[key][myreg]) <= mycount
+        echom "There are only ".len(s:sources[key][myreg])." in memory…"
         return -1
     endif
-    if !buflisted(s:sources[key][reg][count]['bufnr'])
+    if !buflisted(s:sources[key][myreg][mycount]['bufnr'])
         echom "Buffer no longer exists…"
         return -1
     endif
 
-    let s:source = s:sources[key][reg][count]
+    let s:source = s:sources[key][myreg][mycount]
     call s:send_code()
     call s:highlight()
 endfunction
