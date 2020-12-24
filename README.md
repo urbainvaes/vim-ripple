@@ -10,7 +10,7 @@ Some advantages of this plugin over some of the alternatives (such as [iron.nvim
 - If [vim-highlightedyank](https://github.com/machakann/vim-highlightedyank) is installed,
 motions sent to the REPL are highlighted.
 
-- If not explicitly opened by `<Plug>(ripple_open_repl)`,
+- If not explicitly opened by `y<cr>`,
 the REPL opens automatically once a code chunk is sent.
 
 - The plugin is compatible with Tim Pope's [vim-repeat](https://github.com/tpope/vim-repeat).
