@@ -119,10 +119,10 @@ function! s:assign_repl()
 
     let [bufn, ft] = [bufnr('%'), &ft]
     if has_key(s:ft_to_term, ft) && bufexists(s:ft_to_term[ft])
+            \ && (has('nvim') || term_getstatus(s:buf_to_term[bufn]) != "finished")
         let s:buf_to_term[bufn] = s:ft_to_term[ft]
         return 0
     endif
-
     return ripple#open_repl(0)
 endfunction
 
@@ -259,6 +259,7 @@ endfunction
 function! s:send_code(...)
     let bufn = bufnr('%')
     if !has_key(s:buf_to_term, bufn) || !buffer_exists(s:buf_to_term[bufn])
+                \ || (!has('nvim') && term_getstatus(s:buf_to_term[bufn]) == "finished")
         if s:assign_repl() == -1
             return
         endif
