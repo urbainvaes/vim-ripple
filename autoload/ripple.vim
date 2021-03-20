@@ -175,7 +175,12 @@ function! ripple#open_repl(isolated)
             return -1
         endif
 
-        silent execute winpos." new"
+        if has_key(g:, 'ripple_winexpr')
+          silent execute winpos.eval(g:ripple_winexpr)." new"
+        else
+          silent execute winpos." new"
+        endif
+
         if has("nvim")
             silent execute "term" s:repl_params[ft][0]
             if term_name != ""
