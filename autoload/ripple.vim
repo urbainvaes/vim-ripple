@@ -226,7 +226,9 @@ function! ripple#open_repl(isolated)
 
     let term_buf = bufnr('%')
     call win_gotoid(winid)
-    execute "sleep" s:default_delay
+
+    let delay = get(g:, 'ripple_delay', s:default_delay)
+    execute "sleep" delay
 
     let s:buf_to_term[bufn] = term_buf
     if !a:isolated
