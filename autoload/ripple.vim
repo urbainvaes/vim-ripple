@@ -272,7 +272,8 @@ function! s:send_to_buffer(formatted)
     silent execute "noautocmd buffer" s:buf_to_term[bufn]
     norm G$
     if has("nvim")
-        put =a:formatted
+        " put =a:formatted
+        call chansend(getbufvar("%", '&channel'), a:formatted)
     else
         let typed_string = "\<c-\>\<c-n>a".a:formatted
         call feedkeys(typed_string, "ntx")
