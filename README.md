@@ -37,43 +37,77 @@ New REPLs can be defined in the dictionary `g:ripple_repls`.
 These definitions take precedence over the default REPLs defined in the plugin,
 which are listed below.
 In the dictionary, the keys are `filetype`s
-and the values are either of the following:
+and the values are dictionaries specifying options of the REPL.
+The entries that each of these dictionaries can contain are given in the following table:
 
-- A string containing the command to start the REPL (e.g. `bash`, `guile`).
+| Entry    | Default            | Description          |
+| ------   | -------            | -----------          |
+| `exec`   | Mandatory argument | Sting                |
+| `pre`    | `""`               | String               |
+| `post`   | `""`               | String               |
+| `addcr`  | `0`                | Boolean (`0` or `1`) |
+| `filter` | `0`                | `0` or a function    |
 
-- A list of three string entries and a boolean entry:
-the first string must contain the command to start the REPL;
-the second and third must contain strings to prepend and append to code sent to the REPL,
-respectively.
-This is sometimes necessary to enable sending several lines of code to the REPL at once.
-The fourth element of the list must be either 0 or 1,
-and it controls whether an additional `<cr>` should be appended to the code chunks that are followed by a blank line.
-(This can be useful to avoid the need to press `<cr>` manually in the terminal window.
-In `ipython`, for example, two `<cr>` are required to run an indented block.)
+    - The mandatory key `exec` contains the command to start the REPL;
 
-- A list with 5 entries, with the first four being as in the previous item and
-the last one being a function employed to format the code before sending it to the REPL.
-For example, this is used in the default settings below for removing comments from `zsh` code chunks,
-which is useful because coments are not allowed in interactive shells by default
-(this can be changed using `setopt interactivecomments`).
+    - The parameters `pre` and `post` contain strings to prepend and append to code sent to the REPL,
+      respectively.
+      This is sometimes necessary to enable sending several lines of code to the REPL at once.
 
-The current default is the following:
+    - The parameter `addcr` controls whether an additional `<cr>` should be appended to the code chunks that are followed by a blank line.
+      (This can be useful to avoid the need to press `<cr>` manually in the terminal window.
+      In `ipython`, for example, two `<cr>` are required to run an indented block.)
+
+    - Finally, the parameter `filter` is a function employed to format the code before sending it to the REPL.
+      For example, this is used in the default settings below for removing comments from `zsh` code chunks,
+      which is useful because comments are not allowed in interactive shells by default
+      (this can be changed using `setopt interactivecomments`).
+
+The default configuration for `python`, for example,
+can be reproduced by the following lines in `.vimrc`:
+
 ```vim
-function! s:remove_comments(code)
-    return substitute(a:code, "^#[^\r]*\r\\|\r#[^\r]*", "", "g")
+let g:ripple_repls["python"] = {
+    \ "exec": "ipython",
+    \ "pre": "\<c-u>\<esc>[200~",
+    \ "post": "\<esc>[201~",
+    \ "addcr": 1,
+    \ },
+```
+
+If one wishes the plugin to work with indented code,
+for example in `main()` function,
+one may add a filter:
+
+```vim
+function! s:remove_leading_whitespaces(code)
+    " Check if the first line is indented
+    let leading_spaces = matchstr(a:code, '^\s\+')
+
+    if leading_spaces == ""
+        return a:code
+    endif
+
+    " Calculate indentation
+    let indentation = strlen(leading_spaces)
+
+    " Remove further indentations
+    return substitute(a:code, '\(^\|\r\zs\)\s\{'.indentation.'}', "", "g")
 endfunction
 
-let s:default_repls = {
-            \ "python": ["ipython", "\<c-u>\<esc>[200~", "\<esc>[201~", 1],
-            \ "julia": "julia",
-            \ "lua": "lua",
-            \ "r": "R",
-            \ "ruby": "irb",
-            \ "scheme": "guile",
-            \ "sh": "bash",
-            \ "zsh": ["zsh", "", "", 0, function('s:remove_comments')],
-            \ }
+let g:ripple_repls["python"] = {
+    \ "exec": "ipython",
+    \ "pre": "\<c-u>\<esc>[200~",
+    \ "post": "\<esc>[201~",
+    \ "addcr": 1,
+    \ "filter": function('s:remove_leading_whitespaces')
+    \ },
 ```
+
+
+Currently supported languages are the following:
+*Python*, *Julia*, *Lua*, *R*, *Ruby*, *Scheme*, *Sh* and *Zsh*.
+Feel free to open a pull request to add support for other languages.
 
 ## Mappings
 

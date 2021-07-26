@@ -31,7 +31,13 @@ function! s:remove_comments(code)
 endfunction
 
 let s:default_repls = {
-            \ "python": ["ipython", "\<c-u>\<esc>[200~", "\<esc>[201~", 1],
+            \ "python": {
+                \ "exec": "ipython",
+                \ "pre": "\<c-u>\<esc>[200~",
+                \ "post": "\<esc>[201~",
+                \ "addcr": 1,
+                \ "filter": 0,
+                \ },
             \ "julia": "julia",
             \ "lua": "lua",
             \ "r": "R",
@@ -61,7 +67,7 @@ endfunction
 function! ripple#status()
     let [bufn, ft] = [bufnr('%'), &ft]
     if !has_key(s:buf_to_term, bufn)
-        call s:echo("buffer is not paired to any terminal yet…")
+        call s:echo("Buffer is not paired to any terminal yet…")
     elseif s:is_isolated()
         call s:echo("Buffer is paired with isolated REPL in buffer number ".s:buf_to_term[bufn].".")
     else
@@ -83,9 +89,25 @@ function! s:set_repl_params()
             echom "No repl for filetype '".&ft."'…"
             return -1
         endif
+
     if type(repl) == 1
-        let repl = [repl, "", "", 0]
+        let repl = {"exec": repl}
     endif
+
+    " Legacy
+    if type(repl) == 3
+        let repl = {
+                    \ "exec": repl[0],
+                    \ "pre": repl[1],
+                    \ "post": repl[2],
+                    \ "addcr": repl[3],
+                    \ "filter": len(repl) > 4 ? repl[4] : 0
+                    \ }
+    endif
+
+    let params = {"pre": "", "post": "", "addcr": 0, "filter": 0}
+    call extend(params, repl)
+
     let s:repl_params[&ft] = repl
     return 0
 endfunction
@@ -177,7 +199,7 @@ function! ripple#open_repl(isolated)
 
         silent execute winpos." new"
         if has("nvim")
-            silent execute "term" s:repl_params[ft][0]
+            silent execute "term" s:repl_params[ft]["exec"]
             if term_name != ""
                 exec "file ".term_name
             endif
@@ -189,7 +211,7 @@ function! ripple#open_repl(isolated)
             if has_key(g:, 'ripple_term_options')
                 call extend(term_options, g:ripple_term_options)
             endif
-            silent call term_start(s:repl_params[ft][0], term_options)
+            silent call term_start(s:repl_params[ft]["exec"], term_options)
         endif
     else
         " Legacy code
@@ -209,10 +231,10 @@ function! ripple#open_repl(isolated)
         if has("nvim")
             let new_window = get(g:, 'ripple_window', s:default_window)
             silent execute new_window
-            silent execute "term" s:repl_params[ft][0]
+            silent execute "term" s:repl_params[ft]["exec"]
         else
             let term_command = get(g:, 'ripple_term_command', s:default_term_command)
-            silent execute term_command s:repl_params[ft][0]
+            silent execute term_command s:repl_params[ft]["exec"]
         endif
     endif
 
@@ -269,17 +291,17 @@ function! s:send_code(...)
         " Add <cr> (useful e.g. so that python functions get run)
         let ft = s:source['ft']
         let code = s:extract_code()
-        let code = (s:is_end_paragraph() && s:repl_params[ft][3]) ? code."\<cr>" : code
+        let code = (s:is_end_paragraph() && s:repl_params[ft]["addcr"]) ? code."\<cr>" : code
         let newline = s:is_charwise() ? "" : "\<cr>"
-        if len(s:repl_params[ft]) == 5
-            let code = s:repl_params[ft][4](code)
+        if s:repl_params[ft]["filter"] != 0
+            let code = s:repl_params[ft]["filter"](code)
         endif
     else
         let ft = &ft
         let code = a:1
         let newline = "\<cr>"
     endif
-    let bracketed_paste = [s:repl_params[ft][1], s:repl_params[ft][2]]
+    let bracketed_paste = [s:repl_params[ft]["pre"], s:repl_params[ft]["post"]]
     let formatted_code = bracketed_paste[0].code.bracketed_paste[1].newline
     call s:send_to_buffer(formatted_code)
 endfunction
