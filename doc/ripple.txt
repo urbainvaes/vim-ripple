@@ -106,37 +106,57 @@ Global configuration~
 
     Internally, a REPL configuration for a given filetype is a combination of
     five variables:
-          - A {command} to start the REPL;
-          - A pair of strings {string1} and {string2} to prepend and append to
+
+          - A {command} to start the REPL.
+
+          - A pair of strings {pre} and {post} to prepend and append to
             code sent to the REPL, respectively. This is sometimes necessary
             to enable sending several lines of code to the REPL at once.
-          - A boolean {extra_cr} that controls whether an additional <cr>
+
+          - A boolean {addcr} that controls whether an additional <cr>
             should be appended to the code chunks that are followed by a blank
             line. (This can be useful to avoid the need to press <cr> manually
             in the terminal window. In ipython, for example, two <cr> are
             required to run an indented block.)
-          - An optional function {filter} to further filter the code before
-            sending it to the REPL.
+
+          - A parameter {filter} to further filter the code before sending it
+            to the REPL. This parameter is a function reference, or just `0`
+            if no filter is in use. The vim function |function()| enables to
+            obtain the reference to a function.
 
     In the dictionary |g:ripple_repl|, the keys are |filetype|s and the values
     are either of the following:
+
         - A string containing the {command} to start the REPL (e.g. 'bash',
           'guile'). In this case the other parameters are assumed to be as
-          follows: {string1} = "",  {string2} = "" and {extra_cr} = 0.
-        - A list with four entries:
-              [{command}, {string1}, {string2}, {extra_cr}]
-        - A list with five entries:
-              [{command}, {string1}, {string2}, {extra_cr}, {filter}]
+          follows: {pre} = "",  {post} = "", {addcr} = 0 and {filter} = 0.
+
+        - A dictionary specifying the REPL options, with keys corresponding to
+          the five parameters described above and the same default values as
+          in the previous item; that is, the keys are 'command', 'pre',
+          'post', 'addcr', and 'filter'. You don't need to specify options if
+          you are satisfied with the default values.
 
     Default: >
-       {  "python": ["ipython", "\<c-u>\<esc>[200~", "\<esc>[201~", 1],
-        \ "julia": "julia",
-        \ "lua": "lua",
-        \ "r": "R",
-        \ "ruby": "irb",
-        \ "scheme": "guile",
-        \ "sh": "bash",
-        \ "zsh": "zsh"}
+        let s:default_repls = {
+            \ "python": {
+                \ "exec": "ipython",
+                \ "pre": "\<c-u>\<esc>[200~",
+                \ "post": "\<esc>[201~",
+                \ "addcr": 1,
+                \ "filter": 0,
+                \ },
+            \ "julia": "julia",
+            \ "lua": "lua",
+            \ "r": "R",
+            \ "ruby": "irb",
+            \ "scheme": "guile",
+            \ "sh": "bash",
+            \ "zsh": {
+                \ "exec": "zsh",
+                \ "filter": function('s:remove_comments'),
+                \ }
+            \ }
 
 *g:ripple_winpos*
     Modifier for the window position. In nvim, this modifier is prepended to
@@ -170,6 +190,13 @@ Buffer-local configuration~
 
 ==============================================================================
 CHANGELOG                                                    *ripple-changelog*
+
+Jul 2021~
+    Improve the data structures for specifying the REPLS. Configuration for
+    the REPLS can now be achieved through dictionaries, which are more
+    descriptive and flexible than lists. In particular, only a subset of the
+    options can be specified, in which case the other options take default
+    values.
 
 Dec 2020~
     Previous selections associated with a given buffer are now stored in a
