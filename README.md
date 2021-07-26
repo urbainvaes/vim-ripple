@@ -48,20 +48,20 @@ The entries that each of these dictionaries can contain are given in the followi
 | `addcr`  | `0`                | Boolean (`0` or `1`) |
 | `filter` | `0`                | `0` or a function    |
 
-    - The mandatory key `exec` contains the command to start the REPL;
+- The mandatory key `exec` contains the command to start the REPL;
 
-    - The parameters `pre` and `post` contain strings to prepend and append to code sent to the REPL,
-      respectively.
-      This is sometimes necessary to enable sending several lines of code to the REPL at once.
+- The parameters `pre` and `post` contain strings to prepend and append to code sent to the REPL,
+  respectively.
+  This is sometimes necessary to enable sending several lines of code to the REPL at once.
 
-    - The parameter `addcr` controls whether an additional `<cr>` should be appended to the code chunks that are followed by a blank line.
-      (This can be useful to avoid the need to press `<cr>` manually in the terminal window.
-      In `ipython`, for example, two `<cr>` are required to run an indented block.)
+- The parameter `addcr` controls whether an additional `<cr>` should be appended to the code chunks that are followed by a blank line.
+  (This can be useful to avoid the need to press `<cr>` manually in the terminal window.
+  In `ipython`, for example, two `<cr>` are required to run an indented block.)
 
-    - Finally, the parameter `filter` is a function employed to format the code before sending it to the REPL.
-      For example, this is used in the default settings below for removing comments from `zsh` code chunks,
-      which is useful because comments are not allowed in interactive shells by default
-      (this can be changed using `setopt interactivecomments`).
+- Finally, the parameter `filter` is a function employed to format the code before sending it to the REPL.
+  For example, this is used in the default settings below for removing comments from `zsh` code chunks,
+  which is useful because comments are not allowed in interactive shells by default
+  (this can be changed using `setopt interactivecomments`).
 
 The default configuration for `python`, for example,
 can be reproduced by the following lines in `.vimrc`:
@@ -76,8 +76,8 @@ let g:ripple_repls["python"] = {
 ```
 
 If one wishes the plugin to work with indented code,
-for example in `main()` function,
-one may add a filter:
+for example in a `main()` function,
+one may add a filter as follows:
 
 ```vim
 function! s:remove_leading_whitespaces(code)
@@ -104,8 +104,7 @@ let g:ripple_repls["python"] = {
     \ },
 ```
 
-
-Currently supported languages are the following:
+Currently only the following languages have default configurations:
 *Python*, *Julia*, *Lua*, *R*, *Ruby*, *Scheme*, *Sh* and *Zsh*.
 Feel free to open a pull request to add support for other languages.
 
