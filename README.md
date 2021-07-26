@@ -42,7 +42,7 @@ The entries that each of these dictionaries can contain are given in the followi
 
 | Entry     | Default            | Description                 |
 | ------    | -------            | -----------                 |
-| `command` | Mandatory argument | Sting                       |
+| `command` | Mandatory argument | String                      |
 | `pre`     | `""`               | String                      |
 | `post`    | `""`               | String                      |
 | `addcr`   | `0`                | Boolean (`0` or `1`)        |
@@ -67,6 +67,7 @@ The default configuration for `python`, for example,
 can be reproduced by the following lines in `.vimrc`:
 
 ```vim
+let g:ripple_repls = {}
 let g:ripple_repls["python"] = {
     \ "exec": "ipython",
     \ "pre": "\<c-u>\<esc>[200~",
@@ -95,13 +96,8 @@ function! s:remove_leading_whitespaces(code)
     return substitute(a:code, '\(^\|\r\zs\)\s\{'.indentation.'}', "", "g")
 endfunction
 
-let g:ripple_repls["python"] = {
-    \ "exec": "ipython",
-    \ "pre": "\<c-u>\<esc>[200~",
-    \ "post": "\<esc>[201~",
-    \ "addcr": 1,
-    \ "filter": function('s:remove_leading_whitespaces')
-    \ },
+" Add filter to REPL configuration
+let g:ripple_repls["python"]["filter"] = function('s:remove_leading_whitespaces')
 ```
 
 Currently only the following languages have default configurations:

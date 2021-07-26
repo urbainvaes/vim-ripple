@@ -24,7 +24,6 @@ if exists('g:loaded_ripple') || &compatible
     finish
 endif
 let g:loaded_ripple = 1
-let g:ripple_repls = {}
 
 let s:default_enable_mappings = 1
 

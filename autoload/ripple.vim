@@ -76,6 +76,7 @@ function! ripple#status()
     else
         call s:echo("Buffer is paired with shared ".ft." REPL in buffer number ".s:buf_to_term[bufn].".")
     endif
+    echom s:repl_params[&ft]
 endfunction
 
 function! s:set_repl_params()
