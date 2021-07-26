@@ -40,15 +40,15 @@ In the dictionary, the keys are `filetype`s
 and the values are dictionaries specifying options of the REPL.
 The entries that each of these dictionaries can contain are given in the following table:
 
-| Entry    | Default            | Description          |
-| ------   | -------            | -----------          |
-| `exec`   | Mandatory argument | Sting                |
-| `pre`    | `""`               | String               |
-| `post`   | `""`               | String               |
-| `addcr`  | `0`                | Boolean (`0` or `1`) |
-| `filter` | `0`                | `0` or a function    |
+| Entry     | Default            | Description                 |
+| ------    | -------            | -----------                 |
+| `command` | Mandatory argument | Sting                       |
+| `pre`     | `""`               | String                      |
+| `post`    | `""`               | String                      |
+| `addcr`   | `0`                | Boolean (`0` or `1`)        |
+| `filter`  | `0`                | `0` or a function reference |
 
-- The mandatory key `exec` contains the command to start the REPL;
+- The mandatory key `command` contains the command to start the REPL (e.g. `julia`, `guile`, `bash`).
 
 - The parameters `pre` and `post` contain strings to prepend and append to code sent to the REPL,
   respectively.
@@ -59,7 +59,7 @@ The entries that each of these dictionaries can contain are given in the followi
   In `ipython`, for example, two `<cr>` are required to run an indented block.)
 
 - Finally, the parameter `filter` is a function employed to format the code before sending it to the REPL.
-  For example, this is used in the default settings below for removing comments from `zsh` code chunks,
+  For example, this is used in the default settings for removing comments from `zsh` code chunks,
   which is useful because comments are not allowed in interactive shells by default
   (this can be changed using `setopt interactivecomments`).
 
@@ -114,14 +114,14 @@ The functions are exposed via `<Plug>` mappings.
 If `g:ripple_enable_mappings` is set to `1`,
 then additional mappings to keys are defined as follows:
 
-| `<Plug>` Mapping                    | Default key mapping | Description                    |
-| -----------------------------       | ------------------- | -----------                    |
-| `<Plug>(ripple_open_repl)`          | `y<cr>` (`nmap`)    | Open REPL                      |
+| `<Plug>` Mapping                | Default key mapping | Description                    |
+| -----------------------------   | ------------------- | -----------                    |
+| `<Plug>(ripple_open_repl)`      | `y<cr>` (`nmap`)    | Open REPL                      |
 | `<Plug>(ripple_send_motion)`    | `yr` (`nmap`)       | Send motion to REPL            |
 | `<Plug>(ripple_send_previous)`  | `yp` (`nmap`)       | Resend previous code selection |
 | `<Plug>(ripple_send_selection)` | `R` (`xmap`)        | Send selection to REPL         |
 | `<Plug>(ripple_send_line)`      | `yrr` (`nmap`)      | Send line to REPL              |
-| `<Plug>(ripple_send_buffer)`        | `yr<cr>` (`nmap`)   | Send whole buffer to REPL      |
+| `<Plug>(ripple_send_buffer)`    | `yr<cr>` (`nmap`)   | Send whole buffer to REPL      |
 
 If `<Plug>(ripple_send_motion)` is issued but no REPL is open,
 a REPL will open automatically.

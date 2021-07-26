@@ -32,7 +32,7 @@ endfunction
 
 let s:default_repls = {
             \ "python": {
-                \ "exec": "ipython",
+                \ "command": "ipython",
                 \ "pre": "\<c-u>\<esc>[200~",
                 \ "post": "\<esc>[201~",
                 \ "addcr": 1,
@@ -44,7 +44,10 @@ let s:default_repls = {
             \ "ruby": "irb",
             \ "scheme": "guile",
             \ "sh": "bash",
-            \ "zsh": ["zsh", "", "", 0, function('s:remove_comments')],
+            \ "zsh": {
+                \ "command": "zsh",
+                \ "filter": function('s:remove_comments'),
+                \ }
             \ }
 
 " Memory for the state of the plugin
@@ -91,13 +94,13 @@ function! s:set_repl_params()
         endif
 
     if type(repl) == 1
-        let repl = {"exec": repl}
+        let repl = {"command": repl}
     endif
 
     " Legacy
     if type(repl) == 3
         let repl = {
-                    \ "exec": repl[0],
+                    \ "command": repl[0],
                     \ "pre": repl[1],
                     \ "post": repl[2],
                     \ "addcr": repl[3],
@@ -108,7 +111,7 @@ function! s:set_repl_params()
     let params = {"pre": "", "post": "", "addcr": 0, "filter": 0}
     call extend(params, repl)
 
-    let s:repl_params[&ft] = repl
+    let s:repl_params[&ft] = params
     return 0
 endfunction
 
@@ -199,7 +202,7 @@ function! ripple#open_repl(isolated)
 
         silent execute winpos." new"
         if has("nvim")
-            silent execute "term" s:repl_params[ft]["exec"]
+            silent execute "term" s:repl_params[ft]["command"]
             if term_name != ""
                 exec "file ".term_name
             endif
@@ -211,7 +214,7 @@ function! ripple#open_repl(isolated)
             if has_key(g:, 'ripple_term_options')
                 call extend(term_options, g:ripple_term_options)
             endif
-            silent call term_start(s:repl_params[ft]["exec"], term_options)
+            silent call term_start(s:repl_params[ft]["command"], term_options)
         endif
     else
         " Legacy code
@@ -231,10 +234,10 @@ function! ripple#open_repl(isolated)
         if has("nvim")
             let new_window = get(g:, 'ripple_window', s:default_window)
             silent execute new_window
-            silent execute "term" s:repl_params[ft]["exec"]
+            silent execute "term" s:repl_params[ft]["command"]
         else
             let term_command = get(g:, 'ripple_term_command', s:default_term_command)
-            silent execute term_command s:repl_params[ft]["exec"]
+            silent execute term_command s:repl_params[ft]["command"]
         endif
     endif
 
