@@ -70,6 +70,9 @@ function! ripple#status()
 endfunction
 
 function! s:set_repl_params()
+    " FIXME: The keys of s:repl_params should probably be buffers instead of
+    " filetypes… Also, the presence of this buffer variable should force a
+    " separate REPL.
     if has_key(b:, 'ripple_repl')
         let repl = b:ripple_repl
     else
@@ -243,7 +246,7 @@ function! ripple#open_repl(isolated)
 endfunction
 
 function! s:send_to_buffer(formatted)
-    let bufn = bufnr('%')
+    let [ft, bufn] = [&ft, bufnr('%')]
     if !has_key(s:buf_to_term, bufn)
         echom "No term buffer opened for buffer '".bufn."'…"
         return -1
@@ -254,8 +257,11 @@ function! s:send_to_buffer(formatted)
     silent execute "noautocmd buffer" s:buf_to_term[bufn]
     norm G$
     if has("nvim")
-        " put =a:formatted
-        call chansend(getbufvar("%", '&channel'), a:formatted)
+        if s:repl_params[ft][0] == "radian"
+            put =a:formatted
+        else
+            call chansend(getbufvar("%", '&channel'), a:formatted)
+        end
     else
         let typed_string = "\<c-\>\<c-n>a".a:formatted
         call feedkeys(typed_string, "ntx")
