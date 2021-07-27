@@ -314,8 +314,9 @@ function! s:send_code(...)
         let newline = "\<cr>"
     endif
     let bracketed_paste = [s:repl_params[ft]["pre"], s:repl_params[ft]["post"]]
-    let formatted_code = bracketed_paste[0].code.bracketed_paste[1].newline
+    let formatted_code = bracketed_paste[0].code.bracketed_paste[1]
     call s:send_to_buffer(formatted_code)
+    call s:send_to_buffer(newline)
 endfunction
 
 function! s:is_charwise()
