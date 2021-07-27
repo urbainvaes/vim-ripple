@@ -40,19 +40,20 @@ In the dictionary, the keys are `filetype`s
 and the values are dictionaries specifying options of the REPL.
 The entries that each of these dictionaries can contain are given in the following table:
 
-| Entry     | Default            | Description                 |
-| ------    | -------            | -----------                 |
-| `command` | Mandatory argument | String                      |
-| `pre`     | `""`               | String                      |
-| `post`    | `""`               | String                      |
-| `addcr`   | `0`                | Boolean (`0` or `1`)        |
-| `filter`  | `0`                | `0` or a function reference |
+| Keys      | Default values (except for **Python**) | Description                 |
+| ----      | -------------------------------------- | -----------                 |
+| `command` | Mandatory argument                     | String                      |
+| `pre`     | `""`                                   | String                      |
+| `post`    | `""`                                   | String                      |
+| `addcr`   | `0`                                    | Boolean (`0` or `1`)        |
+| `filter`  | `0`                                    | `0` or a function reference |
 
 - The mandatory key `command` contains the command to start the REPL (e.g. `julia`, `guile`, `bash`).
 
 - The parameters `pre` and `post` contain strings to prepend and append to code sent to the REPL,
   respectively.
-  This is sometimes necessary to enable sending several lines of code to the REPL at once.
+  This is sometimes necessary to enable sending several lines of code to the REPL at once
+  (see Python example below).
 
 - The parameter `addcr` controls whether an additional `<cr>` should be appended to the code chunks that are followed by a blank line.
   (This can be useful to avoid the need to press `<cr>` manually in the terminal window.
@@ -63,8 +64,7 @@ The entries that each of these dictionaries can contain are given in the followi
   which is useful because comments are not allowed in interactive shells by default
   (this can be changed using `setopt interactivecomments`).
 
-The default configuration for `python`, for example,
-can be reproduced by the following lines in `.vimrc`:
+The default configuration for `python` can be reproduced by the following lines in `.vimrc`:
 
 ```vim
 let g:ripple_repls = {}

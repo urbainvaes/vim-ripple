@@ -132,12 +132,16 @@ Global configuration~
           follows: {pre} = "",  {post} = "", {addcr} = 0 and {filter} = 0.
 
         - A dictionary specifying the REPL options, with keys corresponding to
-          the five parameters described above and the same default values as
-          in the previous item; that is, the keys are 'command', 'pre',
-          'post', 'addcr', and 'filter'. You don't need to specify options if
-          you are satisfied with the default values.
+          the five parameters described above; that is, 'command', 'pre',
+          'post', 'addcr', and 'filter'. The 'command' parameter is required
+          and the other parameters are optional. If an optional parameter is
+          omitted, the plugin employs a language-specific default value, if
+          one is defined in the plugin code, or else the same defaults values
+          as in the previous item: {pre} = "", {post} = "", {addcr} = 0 and
+          {filter} = 0. At the moment, language-specific defaults are defined
+          only for Python and Zsh, as presented below.
 
-    Default: >
+    Default values: >
         let s:default_repls = {
             \ "python": {
                 \ "exec": "ipython",
