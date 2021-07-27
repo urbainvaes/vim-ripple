@@ -69,7 +69,7 @@ can be reproduced by the following lines in `.vimrc`:
 ```vim
 let g:ripple_repls = {}
 let g:ripple_repls["python"] = {
-    \ "exec": "ipython",
+    \ "command": "ipython",
     \ "pre": "\<c-u>\<esc>[200~",
     \ "post": "\<esc>[201~",
     \ "addcr": 1,
