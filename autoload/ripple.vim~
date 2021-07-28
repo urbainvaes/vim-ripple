@@ -322,9 +322,6 @@ function! s:send_code(...)
     let bracketed_paste = [s:repl_params[ft]["pre"], s:repl_params[ft]["post"]]
     let formatted_code = bracketed_paste[0].code.bracketed_paste[1]
     call s:send_to_buffer(formatted_code)
-
-    " Hack for windows
-    " Before, the new line was appended to `formatted_code`.
     if has_key(g:, "ripple_sleep_hack")
         redraw
         exe "sleep ".g:ripple_sleep_hack
