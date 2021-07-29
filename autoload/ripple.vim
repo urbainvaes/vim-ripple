@@ -25,6 +25,7 @@ let s:default_highlight = "DiffAdd"
 let s:default_winpos = "vertical"
 let s:default_delay = "500m"
 let s:default_term_name = "term: ripple"
+let s:default_always_return = 0
 
 function! s:remove_comments(code)
     return substitute(a:code, "^#[^\r]*\r\\|\r#[^\r]*", "", "g")
@@ -36,7 +37,7 @@ let s:default_repls = {
                 \ "pre": "\<esc>[200~",
                 \ "post": "\<esc>[201~",
                 \ "addcr": 0,
-                \ "filter": 0,
+                \ "filter": {x -> x},
                 \ },
             \ "julia": "julia",
             \ "lua": "lua",
@@ -310,7 +311,8 @@ function! s:send_code(...)
         let ft = s:source['ft']
         let code = s:extract_code()
         let code = (s:is_end_paragraph() && s:repl_params[ft]["addcr"]) ? code."\<cr>" : code
-        let newline = s:is_charwise() ? "" : "\<cr>"
+        let always_return = get(g:, "ripple_always_return", s:default_always_return)
+        let newline = (s:is_charwise() && !always_return) ? "" : "\<cr>"
         if s:repl_params[ft]["filter"] != 0
             let code = s:repl_params[ft]["filter"](code)
         endif

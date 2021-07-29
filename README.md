@@ -46,7 +46,7 @@ The entries that each of these dictionaries can contain are given in the followi
 | `pre`     | `""`                                   | String                      |
 | `post`    | `""`                                   | String                      |
 | `addcr`   | `0`                                    | Boolean (`0` or `1`)        |
-| `filter`  | `0`                                    | `0` or a function reference |
+| `filter`  | `{x -> x}` (no effect)                 | `0` or a function reference |
 
 - The mandatory key `command` contains the command to start the REPL (e.g. `julia`, `guile`, `bash`).
 
@@ -127,12 +127,13 @@ see the documentation for details.
 
 ## Additional customization
 
-| Config                     | Default      | Description                        |
-| ------                     | -------      | -----------                        |
-| `g:ripple_winpos`          | `"vertical"` | Window position                    |
-| `g:ripple_term_name`       | undefined    | Name of the terminal buffer        |
-| `g:ripple_enable_mappings` | `1`          | Whether to enable default mappings |
-| `g:ripple_highlight`       | `"DiffAdd"`  | Highlight group                    |
+| Config                     | Default      | Description                          |
+| ------                     | -------      | -----------                          |
+| `g:ripple_winpos`          | `"vertical"` | Window position                      |
+| `g:ripple_term_name`       | undefined    | Name of the terminal buffer          |
+| `g:ripple_enable_mappings` | `1`          | Whether to enable default mappings   |
+| `g:ripple_highlight`       | `"DiffAdd"`  | Highlight group                      |
+| `g:ripple_always_return`   | `0`          | Add `<cr>` even for charwise motions |
 
 The options `g:ripple_winpos` is the modifier to prepend to `new` (in `nvim`) or `term` (in `vim`) when opening the REPL window.
 To disable the highlighting of code chunks sent to the REPL, simply `let g:ripple_highlight = ""`.
