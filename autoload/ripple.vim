@@ -37,7 +37,7 @@ let s:default_repls = {
                 \ "pre": "\<esc>[200~",
                 \ "post": "\<esc>[201~",
                 \ "addcr": 0,
-                \ "filter": {x -> x},
+                \ "filter": 0,
                 \ },
             \ "julia": "julia",
             \ "lua": "lua",
