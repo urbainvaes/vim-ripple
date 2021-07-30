@@ -27,8 +27,13 @@ Using [vim-plug](https://github.com/junegunn/vim-plug):
 ```vim
 Plug 'urbainvaes/vim-ripple'
 
-" Optional dependency
+" OPTIONAL DEPENDENCIES
+
+" Highlight code chunks sent to REPL
 Plug 'machakann/vim-highlightedyank'
+
+" Streamline navigation (e.g. autoinsert in terminal)
+Plug 'urbainvaes/vim-tmux-pilot'
 ```
 
 ## Configuration of the REPLs
