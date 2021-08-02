@@ -80,19 +80,18 @@ enabled only if |g:ripple_enable_mappings| is set to `1`.
     under label `x`. For example, if a code line was previously sent to
     the REPL with `"ayrr`, this line can be run again with `"ayp`.
 
-    A count `<count>` may also be passed to `yp`. To understand what this
-    does, we remark that the code chunks sent to a REPL are stored
-    internally in a stack, with each new code selection added at the top. The
-    mapping `<count>yp` just sends to the REPL the element of the stack in
-    position `<count>`, where position indices start at 0. For example `1yp`
-    sends to the REPL not the latest code selection, but the one just before,
-    i.e. the second code selection on the stack.
+    A count `<count>` may also be passed to `yp`. The code chunks sent to a
+    REPL are stored internally in a stack, with each new code selection added
+    at the top, and the mapping `<count>yp` just sends to the REPL the element
+    of the stack in position `<count>`, where position indices start at 0. For
+    example `1yp` sends to the REPL not the latest code selection, but the one
+    just before, i.e. the second code selection on the stack.
 
 ["x]<Plug>(ripple_send_line), |yrr|
     Send the current line to the REPL. This is equivalent to >
         ["x]<Plug>(ripple_send_motion)_
 
-<Plug>(ripple_send_buffer), |yr<cr>|
+<["x]<Plug>(ripple_send_buffer), |yr<cr>|
     Send the whole buffer to the REPL.
 
 ==============================================================================
@@ -200,6 +199,9 @@ Buffer-local configuration~
 
 ==============================================================================
 CHANGELOG                                                    *ripple-changelog*
+
+Jul 2021
+    Add the |g:ripple_always_return| option.
 
 Jul 2021~
     Improve the data structures for specifying the REPLS. Configuration for
