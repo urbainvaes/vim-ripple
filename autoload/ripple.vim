@@ -459,6 +459,7 @@ function! ripple#send_buffer()
     let s:source['bufnr'] = bufnr("%")
     call s:send_code()
     call s:highlight()
+    silent! call repeat#set(":\<c-u>call ripple#send_buffer()\<cr>", v:count)
 endfunction
 
 function! ripple#send_visual()
