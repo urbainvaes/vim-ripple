@@ -31,6 +31,7 @@ function! s:remove_comments(code)
     return substitute(a:code, "^#[^\r]*\r\\|\r#[^\r]*", "", "g")
 endfunction
 
+
 let s:default_repls = {
             \ "python": {
                 \ "command": "ipython",
@@ -494,4 +495,20 @@ function! ripple#send_motion()
     call ripple#save()
     set operatorfunc=ripple#accept_motion
     return 'g@'
+endfunction
+
+function! ripple#remove_leading_whitespaces(code)
+
+    " Check if the first line is indented
+    let leading_spaces = matchstr(a:code, '^\s\+')
+
+    if leading_spaces == ""
+        return a:code
+    endif
+
+    " Calculate indentation
+    let indentation = strlen(leading_spaces)
+
+    " Remove further indentations
+    return substitute(a:code, '\(^\|\r\zs\)\s\{'.indentation.'}', "", "g")
 endfunction

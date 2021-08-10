@@ -83,10 +83,10 @@ let g:ripple_repls["python"] = {
 
 If one wishes the plugin to work with indented code,
 for example in a `main()` function,
-one may add a filter as follows:
+one may add a filter as follows :
 
 ```vim
-function! s:remove_leading_whitespaces(code)
+function! Remove_leading_whitespaces(code)
     " Check if the first line is indented
     let leading_spaces = matchstr(a:code, '^\s\+')
 
@@ -102,9 +102,11 @@ function! s:remove_leading_whitespaces(code)
 endfunction
 
 " Add filter to REPL configuration
-let g:ripple_repls["python"]["filter"] = function('s:remove_leading_whitespaces')
+let g:ripple_repls["python"]["filter"] = function('Remove_leading_whitespaces')
 ```
-
+This filter is not enabled by default,
+but it is implemented in the plugin by the function `ripple#remove_leading_whitespaces`,
+which you can use in the REPL configuration.
 Currently only the following languages have default configurations:
 *Python*, *Julia*, *Lua*, *R*, *Ruby*, *Scheme*, *Sh* and *Zsh*.
 Feel free to open a pull request to add support for other languages.
