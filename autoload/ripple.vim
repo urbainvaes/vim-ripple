@@ -84,7 +84,8 @@ endfunction
 function! s:set_repl_params()
     " FIXME: The keys of s:repl_params should probably be buffers instead of
     " filetypes… Also, the presence of this buffer variable should force a
-    " separate REPL.
+    " separate REPL. EDIT: probably fine because dictionary is used only at
+    " REPL startup…
     if has_key(b:, 'ripple_repl')
         let repl = b:ripple_repl
     else
@@ -98,6 +99,7 @@ function! s:set_repl_params()
             echom "No repl for filetype '".&ft."'…"
             return -1
         endif
+    endif
 
     if type(repl) == 1
         let repl = {"command": repl}
@@ -201,10 +203,13 @@ function! ripple#open_repl(isolated)
             endif
         endif
 
-        if bufexists(term_name)
-            echom "Buffer '".term_name."' already exists…"
-            return -1
-        endif
+        while bufexists(term_name)
+            if !a:isolated
+                echom "Buffer '".term_name."' already exists…"
+                return -1
+            endif
+            let term_name = term_name . "_new"
+        endwhile
 
         if has_key(g:, 'ripple_winexpr')
           silent execute winpos.eval(g:ripple_winexpr)." new"
