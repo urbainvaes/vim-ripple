@@ -73,6 +73,7 @@ function! ripple#status()
     let [bufn, ft] = [bufnr('%'), &ft]
     if !has_key(s:buf_to_term, bufn)
         call s:echo("Buffer is not paired to any terminal yet…")
+        return 0
     elseif s:is_isolated()
         call s:echo("Buffer is paired with isolated REPL in buffer number ".s:buf_to_term[bufn].".")
     else
@@ -500,6 +501,11 @@ function! ripple#send_motion()
     call ripple#save()
     set operatorfunc=ripple#accept_motion
     return 'g@'
+endfunction
+
+function! ripple#link_term(buffer)
+    let bufn = bufnr(a:buffer)
+    let s:buf_to_term[bufnr("%")] = bufn
 endfunction
 
 function! ripple#remove_leading_whitespaces(code)

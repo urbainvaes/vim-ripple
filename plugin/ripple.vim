@@ -33,6 +33,7 @@ nnoremap <silent> <Plug>(ripple_send_previous) :<c-u>call ripple#send_previous()
 nnoremap <silent> <Plug>(ripple_send_buffer) :<c-u>call ripple#send_buffer()<cr>
 xnoremap <silent> <Plug>(ripple_send_selection) :<c-u>call ripple#send_visual()<cr>
 nmap <silent> <Plug>(ripple_send_line) <Plug>(ripple_send_motion)_
+nnoremap <Plug>(ripple_link_term) :RippleLink term
 
 if get(g:, 'ripple_enable_mappings', s:default_enable_mappings)
     nmap y<cr> <Plug>(ripple_open_repl)
@@ -41,9 +42,11 @@ if get(g:, 'ripple_enable_mappings', s:default_enable_mappings)
     nmap yrr <Plug>(ripple_send_line)
     nmap yp <Plug>(ripple_send_previous)
     xmap R <Plug>(ripple_send_selection)
+    nmap yrL <Plug>(ripple_link_term)
 
     nmap 1yr "1yr
     nmap 1yrr "1yrr
 endif
 
 command! -range -nargs=* Ripple call ripple#command(<line1>, <line2>, <q-args>)
+command! -complete=buffer -nargs=1 RippleLink call ripple#link_term(<q-args>)

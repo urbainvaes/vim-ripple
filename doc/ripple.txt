@@ -191,7 +191,9 @@ Buffer-local configuration~
 
 *b:ripple_repl*
     REPL configuration for current buffer. This takes precedence over
-    the global option `g:ripple_repls[&filetype]`.
+    the global option `g:ripple_repls[&filetype]`. REPLs which are created
+    from buffers where this variable is defined are isolated: they can receive
+    input only from the parent buffer.
 
 *b:ripple_term_name*
     Name of the REPL buffer. This takes precedence over
