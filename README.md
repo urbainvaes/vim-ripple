@@ -75,10 +75,11 @@ The default configuration for `python` can be reproduced by the following lines 
 let g:ripple_repls = {}
 let g:ripple_repls["python"] = {
     \ "command": "ipython",
-    \ "pre": "\<c-u>\<esc>[200~",
+    \ "pre": "\<esc>[200~",
     \ "post": "\<esc>[201~",
-    \ "addcr": 1,
-    \ },
+    \ "addcr": 0,
+    \ "filter": 0,
+    \ }
 ```
 
 If one wishes the plugin to work with indented code,
