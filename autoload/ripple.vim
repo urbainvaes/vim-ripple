@@ -371,9 +371,14 @@ function! s:extract_code()
 endfunction
 
 function! s:highlight()
-    if bufnr("%") != s:source['bufnr']
+    let buf_win = bufwinnr(s:source['bufnr'])
+    if buf_win == -1
         return
     endif
+
+    let cur_win = winnr()
+    exe buf_win."wincmd w"
+
     let higroup = get(g:, 'ripple_highlight', s:default_highlight)
     if &runtimepath =~ 'highlightedyank' && higroup != ""
         let start = [0, s:source['line_start'], s:source['column_start'], 0]
@@ -382,6 +387,8 @@ function! s:highlight()
         let delay = 1000
         call highlightedyank#highlight#add(higroup, start, end, type, delay)
     endif
+
+    exe cur_win."wincmd w"
 endfunction
 
 function! s:new_source(reg)
