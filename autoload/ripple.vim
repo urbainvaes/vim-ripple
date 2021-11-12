@@ -26,11 +26,11 @@ let s:default_winpos = "vertical"
 let s:default_delay = "500m"
 let s:default_term_name = "term: ripple"
 let s:default_always_return = 0
+let s:default_prev_in_buf = 0
 
 function! s:remove_comments(code)
     return substitute(a:code, "^#[^\r]*\r\\|\r#[^\r]*", "", "g")
 endfunction
-
 
 let s:default_repls = {
             \ "python": {
@@ -449,16 +449,29 @@ function! ripple#send_previous()
         echom "Register is empty…"
         return -1
     endif
-    if len(s:sources[key][myreg]) <= mycount
-        echom "There are only ".len(s:sources[key][myreg])." in memory…"
+
+    let sources = s:sources[key][myreg]
+    let buf_sources = sources
+    if get(g:, 'ripple_prev_in_buf', s:default_prev_in_buf)
+        let bufnr = bufnr("%")
+        let buf_sources = []
+        for source in sources
+            if source['bufnr'] == bufnr
+                call add(buf_sources, source)
+            endif
+        endfor
+    endif
+
+    if len(buf_sources) <= mycount
+        echom "There are only ".len(buf_sources)." in memory…"
         return -1
     endif
-    if !buflisted(s:sources[key][myreg][mycount]['bufnr'])
+    if !buflisted(buf_sources[mycount]['bufnr'])
         echom "Buffer no longer exists…"
         return -1
     endif
 
-    let s:source = s:sources[key][myreg][mycount]
+    let s:source = buf_sources[mycount]
     call s:send_code()
     call s:highlight()
 endfunction

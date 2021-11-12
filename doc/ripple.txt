@@ -32,6 +32,11 @@ COMMANDS                                                      *ripple-commands*
 
     It can be convenient to combine this command with a mapping, e.g. >
         nnoremap yrc :Ripple clear<cr>
+<
+                                                          *ripple-:RippleLink*
+:RippleLink [bufname]
+    Manually link the current buffer to the terminal buffer named [bufname].
+    Completion is enabled for buffer names.
 
 ==============================================================================
 MAPPINGS                                                      *ripple-mappings*
@@ -94,6 +99,10 @@ enabled only if |g:ripple_enable_mappings| is set to `1`.
 <["x]<Plug>(ripple_send_buffer), |yr<cr>|
     Send the whole buffer to the REPL.
 
+<Plug>(ripple_link_term), |yrL|
+    Convenience mapping to >
+        :RippleLink term
+<
 ==============================================================================
 CONFIGURATION                                                   *ripple-config*
 
@@ -187,6 +196,12 @@ Global configuration~
     is sent only if the motion is |linewise|, and not if the motion is |charwise|.
     Default: 0.
 
+*g:ripple_prev_in_buf*
+    If 1, then |yp| looks for previous code chunks only within the current
+    buffer. If 0, |yp| resends the latest code chunk among all buffers paired
+    with the terminal.
+    Default: 1.
+
 Buffer-local configuration~
 
 *b:ripple_repl*
@@ -202,7 +217,17 @@ Buffer-local configuration~
 ==============================================================================
 CHANGELOG                                                    *ripple-changelog*
 
-Jul 2021
+Nov 2021~
+    Modify the default behavior of |yp|: this now reruns the previous code
+    chunk from within the current buffer, and no longer from all buffers
+    paired with the current terminal. The previous behavior can be restored by
+    setting the option >
+        :let g:ripple_prev_in_buf=0
+<
+Nov 2021~
+    Add the |:RippleLink| command.
+
+Jul 2021~
     Add the |g:ripple_always_return| option.
 
 Jul 2021~
