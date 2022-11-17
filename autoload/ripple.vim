@@ -79,7 +79,6 @@ function! ripple#status()
     else
         call s:echo("Buffer is paired with shared ".ft." REPL in buffer number ".s:buf_to_term[bufn].".")
     endif
-    echom s:repl_params[&ft]
 endfunction
 
 function! s:set_repl_params()
@@ -153,7 +152,7 @@ function! s:assign_repl()
 
     let [bufn, ft] = [bufnr('%'), &ft]
     if has_key(s:ft_to_term, ft) && bufexists(s:ft_to_term[ft])
-            \ && (has('nvim') || term_getstatus(s:buf_to_term[bufn]) != "finished")
+            \ && (has('nvim') || term_getstatus(s:ft_to_term[ft]) != "finished")
         let s:buf_to_term[bufn] = s:ft_to_term[ft]
         return 0
     endif
@@ -202,6 +201,22 @@ function! ripple#open_repl(isolated)
             else
                 let term_name = term_name."_".ft."_common"
             endif
+        endif
+
+        if  !a:isolated && !has('nvim') && bufexists(term_name)
+            let nr = bufnr(term_name)
+            if term_getstatus(nr) == "finished"
+                call s:echo("Wiping out finished term buffer!")
+                execute "bwipeout" nr
+            endif
+        endif
+
+        " To enable resourcing the plugin
+        if  !a:isolated && bufexists(term_name)
+            let nr = bufnr(term_name)
+            let s:ft_to_term[ft] = nr
+            let s:buf_to_term[bufn] = nr
+            return 0
         endif
 
         while bufexists(term_name)
