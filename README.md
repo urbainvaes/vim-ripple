@@ -1,6 +1,7 @@
 # Ripple
 
-This thin plugin makes it easy to send code to a REPL (read-evaluate-print loop) running within `vim` or `nvim`.
+This thin plugin makes it easy to send code to a REPL (read-evaluate-print loop) running within `vim` or `nvim`,
+which enables a workflow similar to that in a Jupyter notebook.
 Some advantages of this plugin over some of the alternatives (such as [iron.nvim](https://github.com/Vigemus/iron.nvim)) are the following:
 
 - This plugin is written and can be configured fully in `viml`.
