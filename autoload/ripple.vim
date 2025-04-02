@@ -309,7 +309,8 @@ function! s:send_to_buffer(formatted)
         if s:repl_params[ft]["command"] == "radian"
             put =a:formatted
         else
-            call chansend(getbufvar("%", '&channel'), a:formatted)
+            put =a:formatted
+            " call chansend(getbufvar("%", '&channel'), a:formatted)
         end
     else
         let typed_string = "\<c-\>\<c-n>a".a:formatted
